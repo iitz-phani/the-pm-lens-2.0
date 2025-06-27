@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -92,14 +91,25 @@ const Index = () => {
       {/* Sticky CTA Bar */}
       <div className="fixed top-0 left-0 right-0 z-50 bg-dark-bg/95 backdrop-blur-sm border-b border-dark-border">
         <div className="container mx-auto px-6 py-3 flex justify-between items-center">
-          <div className="font-bold text-xl gradient-text">The PM Lens</div>
-          <Button 
-            className="bg-brand-blue hover:bg-brand-blue-dark transition-all duration-300 animate-glow hidden md:block"
-            onClick={() => window.open('https://calendly.com', '_blank')}
-          >
-            <Calendar className="mr-2 h-4 w-4" />
-            Book a Call
-          </Button>
+          <div className="flex items-center gap-2">
+            <img src="/The PM Lens Logo.png" alt="The PM Lens Logo" className="h-8 w-auto" />
+            <div className="font-bold text-xl text-white">The PM Lens</div>
+          </div>
+          <div className="hidden md:flex items-center gap-8">
+            <nav className="flex items-center gap-6">
+              <a onClick={() => scrollToSection('section-about')} className="text-gray-300 hover:text-white cursor-pointer transition-colors">About</a>
+              <a onClick={() => scrollToSection('section-services')} className="text-gray-300 hover:text-white cursor-pointer transition-colors">Services</a>
+              <a onClick={() => scrollToSection('section-blog')} className="text-gray-300 hover:text-white cursor-pointer transition-colors">Blog</a>
+              <a onClick={() => scrollToSection('section-contact')} className="text-gray-300 hover:text-white cursor-pointer transition-colors">Contact</a>
+            </nav>
+            <Button 
+              className="bg-brand-blue hover:bg-brand-blue-dark transition-all duration-300 animate-glow flex items-center"
+              onClick={() => window.open('https://calendly.com', '_blank')}
+            >
+              <Calendar className="mr-2 h-4 w-4" />
+              Book a Call
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -112,10 +122,10 @@ const Index = () => {
       </Button>
 
       {/* Hero Section */}
-      <section id="section-hero" className={`pt-32 pb-20 px-6 ${isVisible['section-hero'] ? 'animate-fade-in' : 'animate-on-scroll'}`}>
+      <section id="section-hero" className={`pt-32 md:pt-40 pb-20 px-6 ${isVisible['section-hero'] ? 'animate-fade-in' : 'animate-on-scroll'}`}>
         <div className="container mx-auto text-center max-w-4xl">
           <h1 className="text-6xl md:text-8xl font-bold mb-6 gradient-text animate-scale-in">
-            Phani Bhushan Bozzam
+            Phani Bozzam
           </h1>
           <h2 className="text-2xl md:text-3xl font-light mb-8 text-gray-300 animate-fade-in-up">
             Project Management Consultant & AI Content Strategist
@@ -139,10 +149,10 @@ const Index = () => {
 
       {/* About Section */}
       <section id="section-about" className={`py-20 px-6 ${isVisible['section-about'] ? 'animate-fade-in' : 'animate-on-scroll'}`}>
-        <div className="container mx-auto max-w-6xl">
+        <div className="container mx-auto max-w-5xl">
+          <h2 className="text-4xl md:text-5xl font-bold mb-12 gradient-text text-center">How I Work</h2>
           <div className="grid md:grid-cols-2 gap-16 items-center">
-            <div>
-              <h2 className="text-4xl md:text-5xl font-bold mb-8 gradient-text">How I Work</h2>
+            <div className="order-2 md:order-1">
               <div className="space-y-6 text-lg text-gray-300">
                 <p>
                   I bridge the gap between strategic project management and AI-powered content creation. With deep expertise in Agile methodologies and modern cloud PM practices, I help organizations accelerate their delivery while building thought leadership that drives real business results.
@@ -155,9 +165,13 @@ const Index = () => {
                 </p>
               </div>
             </div>
-            <div className="relative">
-              <div className="aspect-square bg-gradient-to-br from-brand-blue/20 to-purple-600/20 rounded-2xl flex items-center justify-center">
-                <div className="text-6xl font-bold text-gray-600">PB</div>
+            <div className="relative order-1 md:order-2 mx-auto md:mx-0 max-w-md w-full">
+              <div className="aspect-square rounded-2xl overflow-hidden shadow-xl">
+                <img 
+                  src="/My Image.jpg" 
+                  alt="Phani Bozzam" 
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                />
               </div>
               <div className="absolute -top-4 -right-4 w-16 h-16 bg-brand-blue rounded-full animate-glow"></div>
             </div>
@@ -167,7 +181,7 @@ const Index = () => {
 
       {/* Services Section */}
       <section id="section-services" className={`py-20 px-6 ${isVisible['section-services'] ? 'animate-fade-in' : 'animate-on-scroll'}`}>
-        <div className="container mx-auto max-w-6xl">
+        <div className="container mx-auto max-w-5xl">
           <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 gradient-text">Services</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {services.map((service, index) => (
@@ -215,14 +229,14 @@ const Index = () => {
 
       {/* Blog Section */}
       <section id="section-blog" className={`py-20 px-6 ${isVisible['section-blog'] ? 'animate-fade-in' : 'animate-on-scroll'}`}>
-        <div className="container mx-auto max-w-6xl">
+        <div className="container mx-auto max-w-5xl">
           <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 gradient-text">Latest Insights</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             <Card className="glass-card border-dark-border hover-lift">
               <CardHeader>
                 <CardTitle className="text-white">The AI-PM Convergence</CardTitle>
                 <CardDescription className="text-gray-400">
-                  How AI is reshaping project management methodologies in 2024
+                  How AI is reshaping project management methodologies in 2025
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -284,15 +298,11 @@ const Index = () => {
               <div className="space-y-4">
                 <div className="flex items-center space-x-4">
                   <Linkedin className="h-6 w-6 text-brand-blue" />
-                  <a href="#" className="text-gray-300 hover:text-brand-blue transition-colors">LinkedIn</a>
+                  <a href="https://www.linkedin.com/in/phani-bozzam" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-brand-blue transition-colors">LinkedIn</a>
                 </div>
                 <div className="flex items-center space-x-4">
-                  <Youtube className="h-6 w-6 text-brand-blue" />
-                  <a href="#" className="text-gray-300 hover:text-brand-blue transition-colors">YouTube</a>
-                </div>
-                <div className="flex items-center space-x-4">
-                  <span className="text-brand-blue">✉</span>
-                  <a href="mailto:hello@thepmlens.com" className="text-gray-300 hover:text-brand-blue transition-colors">hello@thepmlens.com</a>
+                  <span className="text-brand-blue text-2xl">✉</span>
+                  <a href="mailto:phani.bozzam@gmail.com" className="text-gray-300 hover:text-brand-blue transition-colors">phani.bozzam@gmail.com</a>
                 </div>
               </div>
             </div>
@@ -333,7 +343,7 @@ const Index = () => {
             Action-oriented PM insight + AI-driven content to accelerate careers and deliver real ROI.
           </p>
           <p className="text-gray-500 text-sm">
-            © 2024 Phani Bhushan Bozzam. All rights reserved.
+            © 2025 Phani Bhushan Bozzam. All rights reserved.
           </p>
         </div>
       </footer>
