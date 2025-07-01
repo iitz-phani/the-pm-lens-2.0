@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+.env
+MONGODB_URI=mongodb+srv://pm-lens-admin:<db_password>@user-data-cluster.e76qasn.mongodb.net/?retryWrites=true&w=majority&appName=User-Data-Cluster
+PORT=5000
+EMAIL_USER=pm-lens-admin
+EMAIL_PASS=9zgL7DJaUd0CyPSw
+CORS_ORIGIN=http://localhost:8080

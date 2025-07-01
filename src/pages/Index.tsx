@@ -3,9 +3,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ChevronDown, Calendar, BookOpen, Youtube, Linkedin, Palette, Figma, Layers, Eye, Code, Smartphone, Monitor } from 'lucide-react';
+import { toast } from "@/components/ui/use-toast";
 
 const Index = () => {
   const [isVisible, setIsVisible] = useState({});
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    message: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const observerOptions = {
@@ -136,21 +143,76 @@ const Index = () => {
       title: "E-commerce App Redesign",
       description: "Complete UI/UX overhaul resulting in 40% increase in conversion",
       category: "Mobile App",
-      image: "/placeholder.svg"
+      image: "/images/ecommerce-design.svg"
     },
     {
       title: "Brand Identity Package",
       description: "Logo, color palette, and brand guidelines for tech startup",
       category: "Branding",
-      image: "/placeholder.svg"
+      image: "/images/brand-identity.svg"
     },
     {
       title: "Dashboard Design System",
       description: "Component library and design tokens for enterprise platform",
       category: "Design System",
-      image: "/placeholder.svg"
+      image: "/images/dashboard.svg"
     }
   ];
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      // First, let's test if the server is reachable
+      const testResponse = await fetch('http://localhost:5000/api/test-email');
+      console.log('Test email response:', await testResponse.json());
+
+      const response = await fetch('http://localhost:5000/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send message');
+      }
+
+      const data = await response.json();
+      console.log('Response:', data);
+
+      toast({
+        title: "Message Sent!",
+        description: "Thank you for your message. I'll get back to you soon.",
+      });
+
+      // Clear the form
+      setFormData({
+        name: '',
+        email: '',
+        message: ''
+      });
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-dark-bg text-white">
@@ -165,7 +227,6 @@ const Index = () => {
             <nav className="flex items-center gap-6">
               <a onClick={() => scrollToSection('section-about')} className="text-gray-300 hover:text-white cursor-pointer transition-colors">About</a>
               <a onClick={() => scrollToSection('section-services')} className="text-gray-300 hover:text-white cursor-pointer transition-colors">Services</a>
-              <a onClick={() => scrollToSection('section-design')} className="text-gray-300 hover:text-white cursor-pointer transition-colors">Design</a>
               <a onClick={() => scrollToSection('section-blog')} className="text-gray-300 hover:text-white cursor-pointer transition-colors">Blog</a>
               <a onClick={() => scrollToSection('section-contact')} className="text-gray-300 hover:text-white cursor-pointer transition-colors">Contact</a>
             </nav>
@@ -259,7 +320,7 @@ const Index = () => {
                       {service.title}
                     </CardTitle>
                     {service.badge && (
-                      <Badge variant="secondary" className="bg-brand-blue/20 text-brand-blue text-base">
+                      <Badge variant="secondary" className="bg-brand-blue/20 text-brand-blue text-base whitespace-nowrap">
                         {service.badge}
                       </Badge>
                     )}
@@ -294,7 +355,7 @@ const Index = () => {
                         </CardTitle>
                       </div>
                       {skill.badge && (
-                        <Badge variant="secondary" className="bg-brand-blue/20 text-brand-blue text-base">
+                        <Badge variant="secondary" className="bg-brand-blue/20 text-brand-blue text-base whitespace-nowrap">
                           {skill.badge}
                         </Badge>
                       )}
@@ -304,7 +365,7 @@ const Index = () => {
                     </CardDescription>
                     <div className="flex flex-wrap gap-3">
                       {skill.tools.map((tool, toolIndex) => (
-                        <Badge key={toolIndex} variant="outline" className="border-gray-600 text-gray-300 text-base">
+                        <Badge key={toolIndex} variant="outline" className="border-gray-600 text-gray-300 text-base whitespace-nowrap">
                           {tool}
                         </Badge>
                       ))}
@@ -314,38 +375,44 @@ const Index = () => {
               ))}
             </div>
           </div>
-          <div className="mb-16">
-            <h3 className="text-3xl md:text-4xl font-bold text-center mb-8 text-white">Design Portfolio</h3>
-            <div className="grid md:grid-cols-3 gap-10">
-              {designProjects.map((project, index) => (
-                <Card key={index} className="glass-card border-dark-border hover-lift group overflow-hidden flex flex-col p-6">
-                  <div className="aspect-video bg-gradient-to-br from-brand-blue/20 to-purple-500/20 flex items-center justify-center">
-                    <Figma className="h-14 w-14 text-brand-blue" />
-                  </div>
-                  <CardHeader className="flex-1 pb-6">
-                    <div className="flex justify-between items-start mb-4 gap-4">
-                      <CardTitle className="text-xl text-white group-hover:text-brand-blue transition-colors flex-1 min-w-0">
-                        {project.title}
-                      </CardTitle>
-                      <Badge variant="secondary" className="bg-brand-blue/20 text-brand-blue text-base flex-shrink-0">
-                        {project.category}
-                      </Badge>
-                    </div>
-                    <CardDescription className="text-gray-400 text-lg">
-                      {project.description}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="mt-auto">
-                    <Button variant="outline" className="border-brand-blue text-brand-blue hover:bg-brand-blue hover:text-white w-full text-lg py-3">
-                      View Project
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
         </div>
       </section>
+
+      {/* Design Portfolio Section */}
+      <div id="section-portfolio" className={`py-20 ${isVisible['section-portfolio'] ? 'animate-fade-in' : 'opacity-0'}`}>
+        <div className="container mx-auto px-6">
+          <h2 className="text-4xl font-bold mb-12 text-center">Design Portfolio</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {designProjects.map((project, index) => (
+              <Card key={index} className="bg-dark-card border-dark-border hover:border-brand-blue transition-all duration-300">
+                <div className="aspect-video w-full overflow-hidden rounded-t-lg">
+                  <img 
+                    src={project.image} 
+                    alt={project.title} 
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+                <CardHeader>
+                  <div className="flex items-center justify-between mb-2">
+                    <Badge variant="outline" className="bg-dark-accent text-white">
+                      {project.category}
+                    </Badge>
+                  </div>
+                  <CardTitle className="text-xl font-bold">{project.title}</CardTitle>
+                  <CardDescription className="text-gray-400">
+                    {project.description}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button variant="outline" className="w-full">
+                    View Project
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </div>
 
       {/* Portfolio Section */}
       <section id="section-portfolio" className="pt-20 pb-24 px-6 scroll-mt-32">
@@ -451,24 +518,42 @@ const Index = () => {
                 <CardTitle className="text-2xl text-white">Quick Message</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <input 
-                  type="text" 
-                  placeholder="Your Name" 
-                  className="w-full bg-dark-card border border-dark-border rounded-lg p-4 text-white placeholder-gray-500 text-lg"
-                />
-                <input 
-                  type="email" 
-                  placeholder="Your Email" 
-                  className="w-full bg-dark-card border border-dark-border rounded-lg p-4 text-white placeholder-gray-500 text-lg"
-                />
-                <textarea 
-                  placeholder="Your Message" 
-                  rows={4}
-                  className="w-full bg-dark-card border border-dark-border rounded-lg p-4 text-white placeholder-gray-500 text-lg"
-                ></textarea>
-                <Button className="w-full bg-brand-blue hover:bg-brand-blue-dark text-lg py-3">
-                  Send Message
-                </Button>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <input 
+                    type="text" 
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    placeholder="Your Name" 
+                    required
+                    className="w-full bg-dark-card border border-dark-border rounded-lg p-4 text-white placeholder-gray-500 text-lg"
+                  />
+                  <input 
+                    type="email" 
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    placeholder="Your Email" 
+                    required
+                    className="w-full bg-dark-card border border-dark-border rounded-lg p-4 text-white placeholder-gray-500 text-lg"
+                  />
+                  <textarea 
+                    name="message"
+                    value={formData.message}
+                    onChange={handleInputChange}
+                    placeholder="Your Message" 
+                    required
+                    rows={4}
+                    className="w-full bg-dark-card border border-dark-border rounded-lg p-4 text-white placeholder-gray-500 text-lg"
+                  ></textarea>
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-brand-blue hover:bg-brand-blue-dark text-lg py-3"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? 'Sending...' : 'Send Message'}
+                  </Button>
+                </form>
               </CardContent>
             </Card>
           </div>
