@@ -172,10 +172,6 @@ const Index = () => {
     setIsSubmitting(true);
 
     try {
-      // First, let's test if the server is reachable
-      const testResponse = await fetch('http://localhost:5000/api/test-email');
-      console.log('Test email response:', await testResponse.json());
-
       const response = await fetch('http://localhost:5000/api/contact', {
         method: 'POST',
         headers: {
@@ -313,19 +309,20 @@ const Index = () => {
           <h2 id="section-services" className="text-5xl md:text-6xl font-bold text-center mb-12 gradient-text pt-6 scroll-mt-16">Services</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
             {services.map((service, index) => (
-              <Card key={index} className="glass-card border-dark-border hover-lift group p-6">
+              <Card key={index} className="glass-card border-dark-border hover-lift group p-6 relative">
+                {service.badge && (
+                  <Badge 
+                    variant="secondary" 
+                    className="bg-brand-blue/20 text-brand-blue text-xs whitespace-nowrap absolute top-3 right-3 z-10 px-2 py-0.5"
+                  >
+                    {service.badge}
+                  </Badge>
+                )}
                 <CardHeader className="pb-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <CardTitle className="text-2xl text-white group-hover:text-brand-blue transition-colors">
-                      {service.title}
-                    </CardTitle>
-                    {service.badge && (
-                      <Badge variant="secondary" className="bg-brand-blue/20 text-brand-blue text-base whitespace-nowrap">
-                        {service.badge}
-                      </Badge>
-                    )}
-                  </div>
-                  <CardDescription className="text-gray-400 text-lg">
+                  <CardTitle className="text-2xl text-white group-hover:text-brand-blue transition-colors">
+                    {service.title}
+                  </CardTitle>
+                  <CardDescription className="text-gray-400 text-lg mt-4">
                     {service.description}
                   </CardDescription>
                 </CardHeader>
@@ -447,8 +444,12 @@ const Index = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="mt-auto">
-                <Button variant="outline" className="border-brand-blue text-brand-blue hover:bg-brand-blue hover:text-white w-full text-lg py-3">
-                  Read More
+                <Button 
+                  variant="outline" 
+                  className="border-brand-blue text-brand-blue hover:bg-brand-blue hover:text-white w-full text-lg py-3"
+                  onClick={() => window.open('https://calendly.com/phani-bozzam/30min', '_blank')}
+                >
+                  Know More
                 </Button>
               </CardContent>
             </Card>
@@ -460,8 +461,12 @@ const Index = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="mt-auto">
-                <Button variant="outline" className="border-brand-blue text-brand-blue hover:bg-brand-blue hover:text-white w-full text-lg py-3">
-                  Read More
+                <Button 
+                  variant="outline" 
+                  className="border-brand-blue text-brand-blue hover:bg-brand-blue hover:text-white w-full text-lg py-3"
+                  onClick={() => window.open('https://calendly.com/phani-bozzam/30min', '_blank')}
+                >
+                  Know More
                 </Button>
               </CardContent>
             </Card>
@@ -473,8 +478,12 @@ const Index = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="mt-auto">
-                <Button variant="outline" className="border-brand-blue text-brand-blue hover:bg-brand-blue hover:text-white w-full text-lg py-3">
-                  Read More
+                <Button 
+                  variant="outline" 
+                  className="border-brand-blue text-brand-blue hover:bg-brand-blue hover:text-white w-full text-lg py-3"
+                  onClick={() => window.open('https://calendly.com/phani-bozzam/30min', '_blank')}
+                >
+                  Know More
                 </Button>
               </CardContent>
             </Card>

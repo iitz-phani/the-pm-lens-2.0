@@ -1,5 +1,5 @@
 const express = require('express');
-const mongoose = require('mongoose');
+const { Pool } = require('pg');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const nodemailer = require('nodemailer');
@@ -8,68 +8,53 @@ dotenv.config();
 
 // Debug logging
 console.log('Environment variables loaded:');
-console.log('MONGODB_URI:', process.env.MONGODB_URI);
+console.log('DATABASE_URL:', process.env.DATABASE_URL);
 console.log('CORS_ORIGIN:', process.env.CORS_ORIGIN);
 
 const app = express();
 
 // Middleware
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:8082',
+  origin: process.env.CORS_ORIGIN || 'http://localhost:8080',
   credentials: true
 }));
 app.use(express.json());
 
-// MongoDB Connection with better error handling
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => {
-  console.log('✅ Connected to MongoDB Atlas successfully!');
-})
-.catch((err) => {
-  console.error('❌ MongoDB connection error:', err);
-});
-
-// Add connection event listeners
-mongoose.connection.on('error', err => {
-  console.error('MongoDB connection error:', err);
-});
-
-mongoose.connection.on('disconnected', () => {
-  console.log('MongoDB disconnected');
-});
-
-mongoose.connection.on('reconnected', () => {
-  console.log('MongoDB reconnected');
-});
-
-// Message Schema
-const messageSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  email: {
-    type: String,
-    required: true,
-    trim: true,
-    lowercase: true
-  },
-  message: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
+// PostgreSQL Connection Pool
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
   }
 });
 
-const Message = mongoose.model('Message', messageSchema);
+// Test database connection
+pool.query('SELECT NOW()', (err, res) => {
+  if (err) {
+    console.error('❌ PostgreSQL connection error:', err);
+  } else {
+    console.log('✅ Connected to Neon PostgreSQL successfully!');
+  }
+});
+
+// Create messages table if it doesn't exist
+const createTableQuery = `
+  CREATE TABLE IF NOT EXISTS messages (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  );
+`;
+
+pool.query(createTableQuery, (err, res) => {
+  if (err) {
+    console.error('❌ Error creating table:', err);
+  } else {
+    console.log('✅ Messages table ready');
+  }
+});
 
 // Email Configuration
 const transporter = nodemailer.createTransport({
@@ -80,17 +65,22 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// Test MongoDB Connection endpoint
+// Test Database Connection endpoint
 app.get('/api/test-db', async (req, res) => {
   try {
-    // Try to create a test document
-    const testMessage = new Message({
-      name: 'Test User',
-      email: 'test@example.com',
-      message: 'Test message'
-    });
-    await testMessage.save();
-    await Message.findByIdAndDelete(testMessage._id);
+    // Try to create a test message
+    const testQuery = `
+      INSERT INTO messages (name, email, message) 
+      VALUES ($1, $2, $3) 
+      RETURNING id
+    `;
+    const testValues = ['Test User', 'test@example.com', 'Test message'];
+    
+    const result = await pool.query(testQuery, testValues);
+    const testId = result.rows[0].id;
+    
+    // Clean up test message
+    await pool.query('DELETE FROM messages WHERE id = $1', [testId]);
     
     res.status(200).json({ message: 'Database connection successful!' });
   } catch (error) {
@@ -105,13 +95,17 @@ app.post('/api/contact', async (req, res) => {
     const { name, email, message } = req.body;
 
     // Save to database
-    const newMessage = new Message({
-      name,
-      email,
-      message
-    });
-    await newMessage.save();
-    console.log('✅ Message saved to database:', newMessage._id);
+    const insertQuery = `
+      INSERT INTO messages (name, email, message) 
+      VALUES ($1, $2, $3) 
+      RETURNING id
+    `;
+    const values = [name, email, message];
+    
+    const result = await pool.query(insertQuery, values);
+    const messageId = result.rows[0].id;
+    
+    console.log('✅ Message saved to database:', messageId);
 
     // Send email notification
     try {
@@ -135,7 +129,7 @@ app.post('/api/contact', async (req, res) => {
 
     res.status(200).json({ 
       message: 'Message saved successfully',
-      id: newMessage._id
+      id: messageId
     });
   } catch (error) {
     console.error('❌ Error in /api/contact:', error);
