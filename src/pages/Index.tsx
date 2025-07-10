@@ -172,13 +172,18 @@ const Index = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/contact', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData)
-      });
+      const response = await fetch(
+        import.meta.env.PROD
+          ? '/.netlify/functions/contact'
+          : 'http://localhost:5000/api/contact',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData)
+        }
+      );
 
       if (!response.ok) {
         throw new Error('Failed to send message');
