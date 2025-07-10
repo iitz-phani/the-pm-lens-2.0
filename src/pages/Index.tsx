@@ -77,19 +77,10 @@ const Index = () => {
 
   const portfolioItems = [
     {
-      title: "22 Udemy Courses",
-      description: "Comprehensive project management and AI training programs",
-      metric: "50K+ Students"
-    },
-    {
-      title: "OCI Data Lake Modernization",
-      description: "Enterprise webinar deck for Oracle Cloud Infrastructure",
-      metric: "Enterprise Scale"
-    },
-    {
-      title: "LinkedIn Mastery Workshop",
-      description: "Signature workshop for professional brand building",
-      metric: "95% Success Rate"
+      title: "View My Contributions",
+      description: "Explore my open-source work, side projects, and professional contributions on GitHub.",
+      metric: "GitHub",
+      link: "https://github.com/iitz-phani"
     }
   ];
 
@@ -229,6 +220,7 @@ const Index = () => {
               <a onClick={() => scrollToSection('section-about')} className="text-gray-300 hover:text-white cursor-pointer transition-colors">About</a>
               <a onClick={() => scrollToSection('section-services')} className="text-gray-300 hover:text-white cursor-pointer transition-colors">Services</a>
               <a onClick={() => scrollToSection('section-blog')} className="text-gray-300 hover:text-white cursor-pointer transition-colors">Blog</a>
+              <a href="/pricing" className="text-gray-300 hover:text-white cursor-pointer transition-colors">Pricing</a>
               <a onClick={() => scrollToSection('section-contact')} className="text-gray-300 hover:text-white cursor-pointer transition-colors">Contact</a>
             </nav>
             <Button 
@@ -380,49 +372,13 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Design Portfolio Section */}
-      <div className={`py-12 ${isVisible['section-portfolio'] ? 'animate-fade-in' : 'opacity-0'}`}>
-        <div className="container mx-auto px-6">
-          <h2 className="text-4xl font-bold mb-12 text-center">Design Portfolio</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {designProjects.map((project, index) => (
-              <Card key={index} className="bg-dark-card border-dark-border hover:border-brand-blue transition-all duration-300 flex flex-col h-full">
-                <div className="aspect-video w-full overflow-hidden rounded-t-lg">
-                  <img 
-                    src={project.image} 
-                    alt={project.title} 
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
-                <CardHeader className="flex-1">
-                  <div className="flex items-center justify-between mb-2">
-                    <Badge variant="outline" className="bg-dark-accent text-white">
-                      {project.category}
-                    </Badge>
-                  </div>
-                  <CardTitle className="text-xl font-bold">{project.title}</CardTitle>
-                  <CardDescription className="text-gray-400">
-                    {project.description}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="mt-auto">
-                  <Button variant="outline" className="w-full">
-                    View Project
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </div>
-
       {/* Portfolio Section */}
       <section className="pt-12 pb-24 px-6">
         <div className="container mx-auto max-w-7xl">
           <h2 id="section-portfolio" className="text-5xl md:text-6xl font-bold text-center mb-12 gradient-text pt-6 scroll-mt-16">Portfolio Highlights</h2>
-          <div className="grid md:grid-cols-3 gap-10">
+          <div className="grid grid-cols-1 justify-center gap-10">
             {portfolioItems.map((item, index) => (
-              <Card key={index} className="glass-card border-dark-border hover-lift group p-6">
+              <Card key={index} className="glass-card border-dark-border hover-lift group p-6 flex flex-col justify-between">
                 <CardHeader className="pb-6">
                   <div className="text-3xl font-bold text-brand-blue mb-4">{item.metric}</div>
                   <CardTitle className="text-2xl text-white mb-3">{item.title}</CardTitle>
@@ -430,6 +386,11 @@ const Index = () => {
                     {item.description}
                   </CardDescription>
                 </CardHeader>
+                <CardContent className="mt-auto">
+                  <Button variant="outline" className="w-full" onClick={() => window.open(item.link, '_blank')}>
+                    View on GitHub
+                  </Button>
+                </CardContent>
               </Card>
             ))}
           </div>
@@ -581,6 +542,12 @@ const Index = () => {
           <p className="text-gray-400 mb-8 text-lg">
             Action-oriented PM insight + AI-driven content to accelerate careers and deliver real ROI.
           </p>
+          <div className="flex flex-wrap justify-center gap-6 mb-8 text-base">
+            <a href="/cancellation-refunds" className="text-gray-400 hover:text-brand-blue transition-colors">Cancellation & Refunds</a>
+            <a href="/terms-and-conditions" className="text-gray-400 hover:text-brand-blue transition-colors">Terms and Conditions</a>
+            <a href="/privacy" className="text-gray-400 hover:text-brand-blue transition-colors">Privacy</a>
+            <a href="/contact" className="text-gray-400 hover:text-brand-blue transition-colors">Contact Us</a>
+          </div>
           <p className="text-gray-500 text-base">
             © 2025 Phani Bhushan Bozzam. All rights reserved.
           </p>

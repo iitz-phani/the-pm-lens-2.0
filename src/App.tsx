@@ -6,6 +6,11 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Suspense } from "react";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import CancellationRefunds from "./pages/CancellationRefunds";
+import TermsAndConditions from "./pages/TermsAndConditions";
+import Privacy from "./pages/Privacy";
+import Contact from "./pages/Contact";
+import Pricing from "./pages/Pricing";
 
 // Configure the query client with retries and error handling
 const queryClient = new QueryClient({
@@ -29,6 +34,11 @@ const App = () => (
             <Route path="/" element={<Index />} />
             {/* Redirect /index to / */}
             <Route path="/index" element={<Navigate to="/" replace />} />
+            <Route path="/cancellation-refunds" element={<CancellationRefunds />} />
+            <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/pricing" element={<Pricing />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
