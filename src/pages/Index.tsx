@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { ChevronDown, Calendar, BookOpen, Youtube, Linkedin, Palette, Figma, Layers, Eye, Code, Smartphone, Monitor } from 'lucide-react';
 import { toast } from "@/components/ui/use-toast";
+import { Link } from "react-router-dom";
 
 const Index = () => {
   const [isVisible, setIsVisible] = useState({});
@@ -543,10 +544,10 @@ const Index = () => {
             Action-oriented PM insight + AI-driven content to accelerate careers and deliver real ROI.
           </p>
           <div className="flex flex-wrap justify-center gap-6 mb-8 text-base">
-            <a href="/cancellation-refunds" className="text-gray-400 hover:text-brand-blue transition-colors">Cancellation & Refunds</a>
-            <a href="/terms-and-conditions" className="text-gray-400 hover:text-brand-blue transition-colors">Terms and Conditions</a>
-            <a href="/privacy" className="text-gray-400 hover:text-brand-blue transition-colors">Privacy</a>
-            <a href="/contact" className="text-gray-400 hover:text-brand-blue transition-colors">Contact Us</a>
+            <Link to="/cancellation-refunds" className="text-gray-400 hover:text-brand-blue transition-colors">Cancellation & Refunds</Link>
+            <Link to="/terms-and-conditions" className="text-gray-400 hover:text-brand-blue transition-colors">Terms and Conditions</Link>
+            <Link to="/privacy" className="text-gray-400 hover:text-brand-blue transition-colors">Privacy</Link>
+            <Link to="/contact" className="text-gray-400 hover:text-brand-blue transition-colors">Contact Us</Link>
           </div>
           <p className="text-gray-500 text-base">
             © 2025 Phani Bhushan Bozzam. All rights reserved.
