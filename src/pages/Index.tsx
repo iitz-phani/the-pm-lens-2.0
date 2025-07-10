@@ -250,9 +250,9 @@ const Index = () => {
       </Button>
 
       {/* Hero Section */}
-      <section id="section-hero" className="pt-70 md:pt-96 pb-24 px-6 scroll-mt-32 ${isVisible['section-hero'] ? 'animate-fade-in' : 'animate-on-scroll'}">
+      <section className="pt-70 md:pt-96 pb-24 px-6 ${isVisible['section-hero'] ? 'animate-fade-in' : 'animate-on-scroll'}">
         <div className="container mx-auto text-center max-w-6xl">
-          <h1 className="text-6xl md:text-8xl font-bold mb-8 gradient-text animate-scale-in">
+          <h1 id="section-hero" className="text-6xl md:text-8xl font-bold mb-8 gradient-text animate-scale-in scroll-mt-16">
             Phani Bozzam
           </h1>
           <h2 className="text-3xl md:text-4xl font-light mb-10 text-gray-300 animate-fade-in-up">
@@ -276,9 +276,9 @@ const Index = () => {
       </section>
 
       {/* About Section */}
-      <section id="section-about" className="pt-20 pb-24 px-6 scroll-mt-32 ${isVisible['section-about'] ? 'animate-fade-in' : 'animate-on-scroll'}">
+      <section className="pt-20 pb-24 px-6 ${isVisible['section-about'] ? 'animate-fade-in' : 'animate-on-scroll'}">
         <div className="container mx-auto max-w-6xl">
-          <h2 className="text-5xl md:text-6xl font-bold text-center mb-12 gradient-text">How I Work</h2>
+          <h2 id="section-about" className="text-5xl md:text-6xl font-bold text-center mb-12 gradient-text pt-6 scroll-mt-16">How I Work</h2>
           <div className="grid md:grid-cols-2 gap-20 items-center">
             <div className="order-2 md:order-1">
               <div className="space-y-8 text-xl text-gray-300">
@@ -308,9 +308,9 @@ const Index = () => {
       </section>
 
       {/* Services Section */}
-      <section id="section-services" className="pt-20 pb-24 px-6 scroll-mt-32">
+      <section className="pt-12 pb-24 px-6">
         <div className="container mx-auto max-w-6xl">
-          <h2 className="text-5xl md:text-6xl font-bold text-center mb-12 gradient-text">Services</h2>
+          <h2 id="section-services" className="text-5xl md:text-6xl font-bold text-center mb-12 gradient-text pt-6 scroll-mt-16">Services</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
             {services.map((service, index) => (
               <Card key={index} className="glass-card border-dark-border hover-lift group p-6">
@@ -336,9 +336,9 @@ const Index = () => {
       </section>
 
       {/* Design Section */}
-      <section id="section-design" className="pt-20 pb-24 px-6 scroll-mt-32">
+      <section className="pt-12 pb-24 px-6">
         <div className="container mx-auto max-w-7xl">
-          <h2 className="text-5xl md:text-6xl font-bold text-center mb-12 gradient-text">Design Expertise</h2>
+          <h2 id="section-design" className="text-5xl md:text-6xl font-bold text-center mb-12 gradient-text pt-6 scroll-mt-16">Design Expertise</h2>
           <div className="mb-16">
             <h3 className="text-3xl md:text-4xl font-bold text-center mb-8 text-white">Design Skills & Tools</h3>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -379,12 +379,12 @@ const Index = () => {
       </section>
 
       {/* Design Portfolio Section */}
-      <div id="section-portfolio" className={`py-20 ${isVisible['section-portfolio'] ? 'animate-fade-in' : 'opacity-0'}`}>
+      <div className={`py-12 ${isVisible['section-portfolio'] ? 'animate-fade-in' : 'opacity-0'}`}>
         <div className="container mx-auto px-6">
           <h2 className="text-4xl font-bold mb-12 text-center">Design Portfolio</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {designProjects.map((project, index) => (
-              <Card key={index} className="bg-dark-card border-dark-border hover:border-brand-blue transition-all duration-300">
+              <Card key={index} className="bg-dark-card border-dark-border hover:border-brand-blue transition-all duration-300 flex flex-col h-full">
                 <div className="aspect-video w-full overflow-hidden rounded-t-lg">
                   <img 
                     src={project.image} 
@@ -392,7 +392,7 @@ const Index = () => {
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                   />
                 </div>
-                <CardHeader>
+                <CardHeader className="flex-1">
                   <div className="flex items-center justify-between mb-2">
                     <Badge variant="outline" className="bg-dark-accent text-white">
                       {project.category}
@@ -403,7 +403,7 @@ const Index = () => {
                     {project.description}
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="mt-auto">
                   <Button variant="outline" className="w-full">
                     View Project
                   </Button>
@@ -415,9 +415,9 @@ const Index = () => {
       </div>
 
       {/* Portfolio Section */}
-      <section id="section-portfolio" className="pt-20 pb-24 px-6 scroll-mt-32">
+      <section className="pt-12 pb-24 px-6">
         <div className="container mx-auto max-w-7xl">
-          <h2 className="text-5xl md:text-6xl font-bold text-center mb-12 gradient-text">Portfolio Highlights</h2>
+          <h2 id="section-portfolio" className="text-5xl md:text-6xl font-bold text-center mb-12 gradient-text pt-6 scroll-mt-16">Portfolio Highlights</h2>
           <div className="grid md:grid-cols-3 gap-10">
             {portfolioItems.map((item, index) => (
               <Card key={index} className="glass-card border-dark-border hover-lift group p-6">
@@ -435,9 +435,9 @@ const Index = () => {
       </section>
 
       {/* Blog Section */}
-      <section id="section-blog" className="pt-20 pb-24 px-6 scroll-mt-32">
+      <section className="pt-12 pb-24 px-6">
         <div className="container mx-auto max-w-6xl">
-          <h2 className="text-5xl md:text-6xl font-bold text-center mb-12 gradient-text">Latest Insights</h2>
+          <h2 id="section-blog" className="text-5xl md:text-6xl font-bold text-center mb-12 gradient-text pt-6 scroll-mt-16">Latest Insights</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
             <Card className="glass-card border-dark-border hover-lift flex flex-col p-6">
               <CardHeader className="flex-1 pb-6">
@@ -483,9 +483,9 @@ const Index = () => {
       </section>
 
       {/* Contact Section */}
-      <section id="section-contact" className="pt-20 pb-24 px-6 scroll-mt-32">
+      <section className="pt-12 pb-24 px-6">
         <div className="container mx-auto max-w-5xl">
-          <h2 className="text-5xl md:text-6xl font-bold text-center mb-12 gradient-text">Let's Connect</h2>
+          <h2 id="section-contact" className="text-5xl md:text-6xl font-bold text-center mb-12 gradient-text pt-6 scroll-mt-16">Let's Connect</h2>
           <div className="grid md:grid-cols-2 gap-12">
             <div className="space-y-10">
               <div>
