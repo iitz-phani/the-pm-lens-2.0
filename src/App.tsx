@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Suspense } from "react";
 import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
 import CancellationRefunds from "./pages/CancellationRefunds";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import Privacy from "./pages/Privacy";
@@ -40,7 +39,7 @@ const App = () => (
             <Route path="/contact" element={<Contact />} />
             <Route path="/pricing" element={<Pricing />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
+            <Route path="*" element={<div style={{color: 'white', textAlign: 'center', marginTop: '2rem'}}>Page not found.</div>} />
           </Routes>
         </Suspense>
       </BrowserRouter>
