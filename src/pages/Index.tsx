@@ -251,7 +251,7 @@ const Index = () => {
       </Button>
 
       {/* Hero Section */}
-      <section className="pt-70 md:pt-96 pb-24 px-6 ${isVisible['section-hero'] ? 'animate-fade-in' : 'animate-on-scroll'}">
+      <section className="pt-56 md:pt-80 pb-24 px-6 ${isVisible['section-hero'] ? 'animate-fade-in' : 'animate-on-scroll'}">
         <div className="container mx-auto text-center max-w-6xl">
           <h1 id="section-hero" className="text-6xl md:text-8xl font-bold mb-8 gradient-text animate-scale-in scroll-mt-16">
             Phani Bozzam
