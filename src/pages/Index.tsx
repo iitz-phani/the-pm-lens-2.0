@@ -661,15 +661,15 @@ const Index = () => {
                   />
                   
                   <div className="space-y-3">
-                    <input 
-                      type="email" 
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      placeholder="Your Email" 
-                      required
-                      className="w-full bg-dark-card border border-dark-border rounded-lg p-4 text-white placeholder-gray-500 text-lg"
-                    />
+                  <input 
+                    type="email" 
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    placeholder="Your Email" 
+                    required
+                    className="w-full bg-dark-card border border-dark-border rounded-lg p-4 text-white placeholder-gray-500 text-lg"
+                  />
                     
                     {!emailVerified && formData.email && (
                       <div className="space-y-3">
