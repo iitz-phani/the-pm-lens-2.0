@@ -42,7 +42,7 @@ exports.handler = async (event, context) => {
     if (envCheck.EMAIL_USER.exists && envCheck.EMAIL_PASS.exists) {
       try {
         const nodemailer = require('nodemailer');
-        const transporter = nodemailer.createTransporter({
+        const transporter = nodemailer.createTransport({
           service: 'gmail',
           auth: {
             user: process.env.EMAIL_USER,
