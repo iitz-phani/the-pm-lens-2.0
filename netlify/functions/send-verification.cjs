@@ -1,7 +1,42 @@
 const nodemailer = require('nodemailer');
+const fs = require('fs').promises;
+const path = require('path');
 
-// In-memory storage for verification codes (in production, use a database)
-const verificationCodes = new Map();
+// Simple file-based storage for verification codes
+const CODES_FILE = '/tmp/verification_codes.json';
+
+// Helper function to read codes
+const readCodes = async () => {
+  try {
+    const data = await fs.readFile(CODES_FILE, 'utf8');
+    return JSON.parse(data);
+  } catch (error) {
+    return {};
+  }
+};
+
+// Helper function to write codes
+const writeCodes = async (codes) => {
+  try {
+    await fs.writeFile(CODES_FILE, JSON.stringify(codes, null, 2));
+  } catch (error) {
+    console.error('Error writing codes:', error);
+  }
+};
+
+// Fallback: Store code in environment variable (for single user testing)
+const storeCodeInEnv = (email, code) => {
+  try {
+    // For testing purposes, we'll use a simple approach
+    // In production, use a proper database
+    process.env[`VERIFICATION_${email.replace(/[^a-zA-Z0-9]/g, '_')}`] = JSON.stringify({
+      code: code,
+      expiresAt: Date.now() + 10 * 60 * 1000
+    });
+  } catch (error) {
+    console.error('Error storing code in env:', error);
+  }
+};
 
 exports.handler = async (event, context) => {
   // Enable CORS
@@ -42,11 +77,30 @@ exports.handler = async (event, context) => {
     // Generate a 6-digit verification code
     const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
     
-    // Store the code with expiration (10 minutes)
-    verificationCodes.set(email, {
-      code: verificationCode,
-      expiresAt: Date.now() + 10 * 60 * 1000 // 10 minutes
-    });
+    // Try file storage first, fallback to env
+    try {
+      const codes = await readCodes();
+      
+      // Store the code with expiration (10 minutes)
+      codes[email] = {
+        code: verificationCode,
+        expiresAt: Date.now() + 10 * 60 * 1000 // 10 minutes
+      };
+
+      // Clean up expired codes
+      const now = Date.now();
+      Object.keys(codes).forEach(key => {
+        if (codes[key].expiresAt < now) {
+          delete codes[key];
+        }
+      });
+
+      // Write updated codes
+      await writeCodes(codes);
+    } catch (error) {
+      console.log('File storage failed, using env fallback');
+      storeCodeInEnv(email, verificationCode);
+    }
 
     // Configure email transporter
     const transporter = nodemailer.createTransporter({
