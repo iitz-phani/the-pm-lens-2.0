@@ -205,11 +205,22 @@ const Index = () => {
         throw new Error('Failed to send verification code');
       }
 
+      const data = await response.json();
       setVerificationSent(true);
-      toast({
-        title: "Verification Code Sent!",
-        description: "Please check your email for the verification code.",
-      });
+      
+      // For testing purposes, show the code in console and toast
+      if (data.code) {
+        console.log('Verification code for testing:', data.code);
+        toast({
+          title: "Verification Code Generated!",
+          description: `Code: ${data.code} (Check console for testing)`,
+        });
+      } else {
+        toast({
+          title: "Verification Code Sent!",
+          description: "Please check your email for the verification code.",
+        });
+      }
     } catch (error) {
       console.error('Error:', error);
       toast({
