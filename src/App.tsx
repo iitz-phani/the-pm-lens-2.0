@@ -10,6 +10,7 @@ import TermsAndConditions from "./pages/TermsAndConditions";
 import Privacy from "./pages/Privacy";
 import Contact from "./pages/Contact";
 import Pricing from "./pages/Pricing";
+import Upgrade from "./pages/Upgrade";
 
 // Configure the query client with retries and error handling
 const queryClient = new QueryClient({
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/pricing" element={<Pricing />} />
+            <Route path="/upgrade" element={<Upgrade />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<div style={{color: 'white', textAlign: 'center', marginTop: '2rem'}}>Page not found.</div>} />
           </Routes>

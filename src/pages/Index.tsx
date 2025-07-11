@@ -2,18 +2,24 @@ import { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown, Calendar, BookOpen, Youtube, Linkedin, Palette, Figma, Layers, Eye, Code, Smartphone, Monitor } from 'lucide-react';
+import { ChevronDown, Calendar, BookOpen, Youtube, Linkedin, Palette, Figma, Layers, Eye, Code, Smartphone, Monitor, Check } from 'lucide-react';
 import { toast } from "@/components/ui/use-toast";
 import { Link } from "react-router-dom";
+import PaymentModal from '@/components/PaymentModal';
 
 const Index = () => {
   const [isVisible, setIsVisible] = useState({});
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    message: ''
+    message: '',
+    verificationCode: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [verificationSent, setVerificationSent] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   useEffect(() => {
     const observerOptions = {
@@ -157,10 +163,124 @@ const Index = () => {
       ...prev,
       [name]: value
     }));
+    
+    // Reset verification when email changes
+    if (name === 'email') {
+      setEmailVerified(false);
+      setVerificationSent(false);
+      setFormData(prev => ({ ...prev, verificationCode: '' }));
+    }
+  };
+
+  const sendVerificationCode = async () => {
+    if (!formData.email || !formData.email.includes('@')) {
+      toast({
+        title: "Invalid Email",
+        description: "Please enter a valid email address.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsVerifying(true);
+
+    try {
+      const response = await fetch(
+        import.meta.env.PROD
+          ? '/.netlify/functions/send-verification'
+          : 'http://localhost:5000/api/send-verification',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email: formData.email })
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to send verification code');
+      }
+
+      setVerificationSent(true);
+      toast({
+        title: "Verification Code Sent!",
+        description: "Please check your email for the verification code.",
+      });
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send verification code. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const verifyCode = async () => {
+    if (!formData.verificationCode || formData.verificationCode.length !== 6) {
+      toast({
+        title: "Invalid Code",
+        description: "Please enter the 6-digit verification code.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsVerifying(true);
+
+    try {
+      const response = await fetch(
+        import.meta.env.PROD
+          ? '/.netlify/functions/verify-code'
+          : 'http://localhost:5000/api/verify-code',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ 
+            email: formData.email, 
+            code: formData.verificationCode 
+          })
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Invalid verification code');
+      }
+
+      setEmailVerified(true);
+      toast({
+        title: "Email Verified!",
+        description: "Your email has been successfully verified.",
+      });
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: "Verification Failed",
+        description: "Invalid verification code. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsVerifying(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!emailVerified) {
+      toast({
+        title: "Email Not Verified",
+        description: "Please verify your email address before submitting.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -173,7 +293,11 @@ const Index = () => {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(formData)
+          body: JSON.stringify({
+            name: formData.name,
+            email: formData.email,
+            message: formData.message
+          })
         }
       );
 
@@ -193,8 +317,11 @@ const Index = () => {
       setFormData({
         name: '',
         email: '',
-        message: ''
+        message: '',
+        verificationCode: ''
       });
+      setEmailVerified(false);
+      setVerificationSent(false);
     } catch (error) {
       console.error('Error:', error);
       toast({
@@ -221,7 +348,7 @@ const Index = () => {
               <a onClick={() => scrollToSection('section-about')} className="text-gray-300 hover:text-white cursor-pointer transition-colors">About</a>
               <a onClick={() => scrollToSection('section-services')} className="text-gray-300 hover:text-white cursor-pointer transition-colors">Services</a>
               <a onClick={() => scrollToSection('section-blog')} className="text-gray-300 hover:text-white cursor-pointer transition-colors">Blog</a>
-              <a href="/pricing" className="text-gray-300 hover:text-white cursor-pointer transition-colors">Pricing</a>
+              <Link to="/pricing" className="text-gray-300 hover:text-white cursor-pointer transition-colors">Pricing</Link>
               <a onClick={() => scrollToSection('section-contact')} className="text-gray-300 hover:text-white cursor-pointer transition-colors">Contact</a>
             </nav>
             <Button 
@@ -414,9 +541,9 @@ const Index = () => {
                 <Button 
                   variant="outline" 
                   className="border-brand-blue text-brand-blue hover:bg-brand-blue hover:text-white w-full text-lg py-3"
-                  onClick={() => window.open('https://calendly.com/phani-bozzam/30min', '_blank')}
+                  onClick={() => setShowPaymentModal(true)}
                 >
-                  Know More
+                  Book Discovery Call
                 </Button>
               </CardContent>
             </Card>
@@ -431,9 +558,9 @@ const Index = () => {
                 <Button 
                   variant="outline" 
                   className="border-brand-blue text-brand-blue hover:bg-brand-blue hover:text-white w-full text-lg py-3"
-                  onClick={() => window.open('https://calendly.com/phani-bozzam/30min', '_blank')}
+                  onClick={() => setShowPaymentModal(true)}
                 >
-                  Know More
+                  Book Discovery Call
                 </Button>
               </CardContent>
             </Card>
@@ -448,9 +575,9 @@ const Index = () => {
                 <Button 
                   variant="outline" 
                   className="border-brand-blue text-brand-blue hover:bg-brand-blue hover:text-white w-full text-lg py-3"
-                  onClick={() => window.open('https://calendly.com/phani-bozzam/30min', '_blank')}
+                  onClick={() => setShowPaymentModal(true)}
                 >
-                  Know More
+                  Book Discovery Call
                 </Button>
               </CardContent>
             </Card>
@@ -467,12 +594,12 @@ const Index = () => {
               <div>
                 <h3 className="text-2xl font-bold mb-6 text-white">Ready to Transform Your Projects?</h3>
                 <p className="text-gray-400 mb-6 text-lg">
-                  Book a free 30-minute discovery call to discuss how we can accelerate your PM processes and content strategy.
+                  Book a 30-minute discovery call to discuss how we can accelerate your PM processes and content strategy.
                 </p>
                 <Button 
                   size="lg" 
                   className="bg-brand-blue hover:bg-brand-blue-dark text-white px-10 py-5 rounded-2xl hover-lift text-xl"
-                  onClick={() => window.open('https://calendly.com/phani-bozzam/30min', '_blank')}
+                  onClick={() => setShowPaymentModal(true)}
                 >
                   <Calendar className="mr-3 h-6 w-6" />
                   Schedule Discovery Call
@@ -492,6 +619,7 @@ const Index = () => {
             <Card className="glass-card border-dark-border p-6">
               <CardHeader className="pb-6">
                 <CardTitle className="text-2xl text-white">Quick Message</CardTitle>
+                <p className="text-gray-400 text-sm">Please verify your email to ensure we can respond to you.</p>
               </CardHeader>
               <CardContent className="space-y-4">
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -504,15 +632,72 @@ const Index = () => {
                     required
                     className="w-full bg-dark-card border border-dark-border rounded-lg p-4 text-white placeholder-gray-500 text-lg"
                   />
-                  <input 
-                    type="email" 
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    placeholder="Your Email" 
-                    required
-                    className="w-full bg-dark-card border border-dark-border rounded-lg p-4 text-white placeholder-gray-500 text-lg"
-                  />
+                  
+                  <div className="space-y-3">
+                    <input 
+                      type="email" 
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      placeholder="Your Email" 
+                      required
+                      className="w-full bg-dark-card border border-dark-border rounded-lg p-4 text-white placeholder-gray-500 text-lg"
+                    />
+                    
+                    {!emailVerified && formData.email && (
+                      <div className="space-y-3">
+                        {!verificationSent ? (
+                          <Button
+                            type="button"
+                            onClick={sendVerificationCode}
+                            disabled={isVerifying}
+                            className="w-full bg-blue-500 hover:bg-blue-600 text-white"
+                          >
+                            {isVerifying ? 'Sending...' : 'Send Verification Code'}
+                          </Button>
+                        ) : (
+                          <div className="space-y-3">
+                            <input
+                              type="text"
+                              name="verificationCode"
+                              value={formData.verificationCode}
+                              onChange={handleInputChange}
+                              placeholder="Enter 6-digit verification code"
+                              maxLength={6}
+                              className="w-full bg-dark-card border border-dark-border rounded-lg p-4 text-white placeholder-gray-500 text-lg"
+                            />
+                            <div className="flex gap-3">
+                              <Button
+                                type="button"
+                                onClick={verifyCode}
+                                disabled={isVerifying || !formData.verificationCode}
+                                className="flex-1 bg-green-500 hover:bg-green-600 text-white"
+                              >
+                                {isVerifying ? 'Verifying...' : 'Verify Code'}
+                              </Button>
+                              <Button
+                                type="button"
+                                onClick={sendVerificationCode}
+                                disabled={isVerifying}
+                                variant="outline"
+                                className="flex-1 border-gray-600 text-gray-300 hover:bg-gray-700"
+                              >
+                                Resend
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    
+                    {emailVerified && (
+                      <div className="flex items-center gap-2 text-green-400 text-sm">
+                        <Check className="h-4 w-4" />
+                        Email verified successfully
+                      </div>
+                    )}
+                  </div>
+                  
                   <textarea 
                     name="message"
                     value={formData.message}
@@ -524,8 +709,8 @@ const Index = () => {
                   ></textarea>
                   <Button 
                     type="submit" 
-                    className="w-full bg-brand-blue hover:bg-brand-blue-dark text-lg py-3"
-                    disabled={isSubmitting}
+                    className="w-full bg-brand-blue hover:bg-brand-blue-dark text-lg py-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={isSubmitting || !emailVerified}
                   >
                     {isSubmitting ? 'Sending...' : 'Send Message'}
                   </Button>
@@ -554,6 +739,19 @@ const Index = () => {
           </p>
         </div>
       </footer>
+
+      {/* Payment Modal */}
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        onSuccess={() => {
+          setShowPaymentModal(false);
+          toast({
+            title: "Payment Successful!",
+            description: "You can now schedule your discovery call.",
+          });
+        }}
+      />
     </div>
   );
 };

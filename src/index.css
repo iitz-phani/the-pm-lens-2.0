@@ -94,4 +94,8 @@
     transform: translateY(-8px);
     box-shadow: 0 20px 40px rgba(59, 130, 246, 0.15);
   }
+
+  .border-dark-border {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
 }
