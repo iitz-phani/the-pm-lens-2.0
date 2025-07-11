@@ -187,14 +187,17 @@ const Index = () => {
     try {
       const response = await fetch(
         import.meta.env.PROD
-          ? '/.netlify/functions/send-verification'
+          ? '/.netlify/functions/simple-verification'
           : 'http://localhost:5000/api/send-verification',
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ email: formData.email })
+          body: JSON.stringify({ 
+            email: formData.email,
+            action: 'send'
+          })
         }
       );
 
@@ -234,7 +237,7 @@ const Index = () => {
     try {
       const response = await fetch(
         import.meta.env.PROD
-          ? '/.netlify/functions/verify-code'
+          ? '/.netlify/functions/simple-verification'
           : 'http://localhost:5000/api/verify-code',
         {
           method: 'POST',
@@ -243,7 +246,8 @@ const Index = () => {
           },
           body: JSON.stringify({ 
             email: formData.email, 
-            code: formData.verificationCode 
+            code: formData.verificationCode,
+            action: 'verify'
           })
         }
       );
