@@ -11,18 +11,20 @@ const Pricing = () => {
   
   const pricingTiers = [
     {
-      title: "Discovery Call",
-      price: "₹499",
-      description: "30-minute consultation to understand your needs",
+      title: "AI + UI/UX Design & Development",
+      price: "Custom Quote",
+      description: "End-to-end product design and development powered by AI and modern UX principles.",
       features: [
-        "Project assessment",
-        "Strategy discussion",
-        "Service recommendations",
-        "Next steps planning"
+        "AI-driven user research & insights",
+        "Rapid prototyping & wireframing",
+        "Modern, accessible UI design",
+        "Personalized user experiences",
+        "Full-stack development & launch",
+        "Ongoing optimization with AI analytics"
       ],
-      badge: "Popular",
-      cta: "Book Now",
-      popular: false
+      badge: "New",
+      cta: "Get Started",
+      popular: true
     },
     {
       title: "Project Management Consulting",
@@ -38,7 +40,7 @@ const Pricing = () => {
       ],
       badge: "Most Popular",
       cta: "Get Started",
-      popular: true
+      popular: false
     },
     {
       title: "AI Content Strategy",
