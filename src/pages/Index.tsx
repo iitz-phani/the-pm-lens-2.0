@@ -208,24 +208,33 @@ const Index = () => {
       const data = await response.json();
       setVerificationSent(true);
       
-      // For testing purposes, show the code in console and toast
       console.log('Full response data:', data);
       
-      if (data.code) {
-        console.log('🔐 VERIFICATION CODE FOR TESTING:', data.code);
-        console.log('📧 Email:', data.email);
-        console.log('⏰ Timestamp:', data.timestamp);
+      if (data.emailSent) {
+        // Email was sent successfully
+        console.log('✅ Email sent successfully to:', data.email);
+        console.log('📧 Message ID:', data.messageId);
         
         toast({
-          title: "🔐 Verification Code Generated!",
-          description: `Your code is: ${data.code}`,
-          duration: 10000, // Show for 10 seconds
+          title: "✅ Verification Code Sent!",
+          description: "Please check your email for the verification code.",
+          duration: 5000,
         });
+      } else if (data.code) {
+        // Email failed but code is provided as fallback
+        console.log('⚠️ Email delivery failed, showing code as fallback');
+        console.log('🔐 VERIFICATION CODE:', data.code);
+        console.log('📧 Email:', data.email);
+        console.log('❌ Email Error:', data.emailError);
         
-        // Also show an alert for maximum visibility
-        alert(`🔐 VERIFICATION CODE: ${data.code}\n\nThis code is for testing purposes. Please enter it in the verification field.`);
+        toast({
+          title: "⚠️ Email Delivery Failed",
+          description: `Code: ${data.code} (Check console for details)`,
+          variant: "destructive",
+          duration: 10000,
+        });
       } else {
-        console.log('No code in response:', data);
+        // Generic success message
         toast({
           title: "Verification Code Sent!",
           description: "Please check your email for the verification code.",

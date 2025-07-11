@@ -1,3 +1,5 @@
+const nodemailer = require('nodemailer');
+
 // Simple in-memory storage for this function instance
 let verificationCodes = {};
 
@@ -9,6 +11,71 @@ const cleanupExpiredCodes = () => {
       delete verificationCodes[email];
     }
   });
+};
+
+// Create email transporter
+const createTransporter = () => {
+  return nodemailer.createTransporter({
+    service: 'gmail',
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS
+    }
+  });
+};
+
+// Send verification email
+const sendVerificationEmail = async (email, code) => {
+  try {
+    const transporter = createTransporter();
+    
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: '🔐 Your Verification Code - The PM Lens',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+            <h1 style="margin: 0; font-size: 28px;">🔐 Email Verification</h1>
+            <p style="margin: 10px 0 0 0; opacity: 0.9;">The PM Lens - Project Management & Design Services</p>
+          </div>
+          
+          <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px;">
+            <h2 style="color: #333; margin-bottom: 20px;">Your Verification Code</h2>
+            
+            <div style="background: white; border: 2px dashed #667eea; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0;">
+              <h1 style="color: #667eea; font-size: 36px; margin: 0; letter-spacing: 5px; font-family: 'Courier New', monospace;">${code}</h1>
+            </div>
+            
+            <p style="color: #666; margin-bottom: 20px;">
+              Please enter this 6-digit code in the verification field on our website to complete your email verification.
+            </p>
+            
+            <div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px; margin: 20px 0;">
+              <p style="margin: 0; color: #1976d2;">
+                <strong>⏰ This code expires in 10 minutes</strong><br>
+                If you didn't request this code, please ignore this email.
+              </p>
+            </div>
+            
+            <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+            
+            <p style="color: #999; font-size: 14px; text-align: center; margin: 0;">
+              This is an automated message from The PM Lens. Please do not reply to this email.
+            </p>
+          </div>
+        </div>
+      `
+    };
+    
+    const result = await transporter.sendMail(mailOptions);
+    console.log('Email sent successfully:', result.messageId);
+    return { success: true, messageId: result.messageId };
+    
+  } catch (error) {
+    console.error('Email sending failed:', error);
+    return { success: false, error: error.message };
+  }
 };
 
 exports.handler = async (event, context) => {
@@ -78,19 +145,40 @@ exports.handler = async (event, context) => {
 
       console.log('Stored codes:', Object.keys(verificationCodes));
 
-      // For now, just return success without sending email
-      // This will help us test if the basic function works
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({ 
-          message: 'Verification code generated successfully (email sending disabled for testing)',
-          email: email,
-          code: verificationCode, // For testing purposes only
-          timestamp: new Date().toISOString(),
-          debug: 'Email sending is temporarily disabled for testing'
-        })
-      };
+      // Send verification email
+      console.log('Attempting to send email to:', email);
+      const emailResult = await sendVerificationEmail(email, verificationCode);
+      
+      if (emailResult.success) {
+        console.log('Email sent successfully with message ID:', emailResult.messageId);
+        return {
+          statusCode: 200,
+          headers,
+          body: JSON.stringify({ 
+            message: 'Verification code sent successfully to your email',
+            email: email,
+            timestamp: new Date().toISOString(),
+            emailSent: true,
+            messageId: emailResult.messageId
+          })
+        };
+      } else {
+        console.error('Failed to send email:', emailResult.error);
+        // Still store the code but inform about email failure
+        return {
+          statusCode: 200,
+          headers,
+          body: JSON.stringify({ 
+            message: 'Verification code generated but email delivery failed',
+            email: email,
+            code: verificationCode, // Fallback: show code in response
+            timestamp: new Date().toISOString(),
+            emailSent: false,
+            emailError: emailResult.error,
+            note: 'Code is shown here due to email delivery issues'
+          })
+        };
+      }
 
     } else if (action === 'verify') {
       console.log('Verifying code for:', email);
