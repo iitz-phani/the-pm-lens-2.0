@@ -164,18 +164,18 @@ exports.handler = async (event, context) => {
         };
       } else {
         console.error('Failed to send email:', emailResult.error);
-        // Still store the code but inform about email failure
+        // Don't show the code, just inform about the failure
         return {
-          statusCode: 200,
+          statusCode: 500,
           headers,
           body: JSON.stringify({ 
-            message: 'Verification code generated but email delivery failed',
+            error: 'Email delivery failed',
+            message: 'Unable to send verification code. Please check your email configuration.',
             email: email,
-            code: verificationCode, // Fallback: show code in response
             timestamp: new Date().toISOString(),
             emailSent: false,
             emailError: emailResult.error,
-            note: 'Code is shown here due to email delivery issues'
+            debugUrl: '/.netlify/functions/debug-env'
           })
         };
       }

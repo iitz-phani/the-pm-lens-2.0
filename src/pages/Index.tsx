@@ -220,24 +220,17 @@ const Index = () => {
           description: "Please check your email for the verification code.",
           duration: 5000,
         });
-      } else if (data.code) {
-        // Email failed but code is provided as fallback
-        console.log('⚠️ Email delivery failed, showing code as fallback');
-        console.log('🔐 VERIFICATION CODE:', data.code);
+      } else {
+        // Email failed - show error message
+        console.log('❌ Email delivery failed');
         console.log('📧 Email:', data.email);
         console.log('❌ Email Error:', data.emailError);
         
         toast({
-          title: "⚠️ Email Delivery Failed",
-          description: `Code: ${data.code} (Check console for details)`,
+          title: "❌ Email Delivery Failed",
+          description: "Unable to send verification code. Please try again later.",
           variant: "destructive",
-          duration: 10000,
-        });
-      } else {
-        // Generic success message
-        toast({
-          title: "Verification Code Sent!",
-          description: "Please check your email for the verification code.",
+          duration: 8000,
         });
       }
     } catch (error) {
