@@ -45,27 +45,42 @@ const Contact = () => {
 
     try {
       const response = await fetch(
-        import.meta.env.PROD
-          ? '/.netlify/functions/send-verification'
-          : 'http://localhost:5000/api/send-verification',
+        '/.netlify/functions/simple-verification',
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ email: form.email })
+          body: JSON.stringify({ email: form.email, action: 'send' })
         }
       );
 
-      if (!response.ok) {
-        throw new Error('Failed to send verification code');
-      }
-
+      const data = await response.json();
       setVerificationSent(true);
-      toast({
-        title: "Verification Code Sent!",
-        description: "Please check your email for the verification code.",
-      });
+      
+      if (data.emailSent) {
+        // Email was sent successfully
+        console.log('✅ Email sent successfully to:', data.email);
+        console.log('📧 Message ID:', data.messageId);
+        
+        toast({
+          title: "✅ Verification Code Sent!",
+          description: "Please check your email for the verification code.",
+          duration: 5000,
+        });
+      } else {
+        // Email failed - show error message
+        console.log('❌ Email delivery failed');
+        console.log('📧 Email:', data.email);
+        console.log('❌ Email Error:', data.emailError);
+        
+        toast({
+          title: "❌ Email Delivery Failed",
+          description: "Unable to send verification code. Please try again later.",
+          variant: "destructive",
+          duration: 8000,
+        });
+      }
     } catch (err) {
       setError('Failed to send verification code. Please try again.');
       toast({
@@ -93,9 +108,7 @@ const Contact = () => {
 
     try {
       const response = await fetch(
-        import.meta.env.PROD
-          ? '/.netlify/functions/verify-code'
-          : 'http://localhost:5000/api/verify-code',
+        '/.netlify/functions/simple-verification',
         {
           method: 'POST',
           headers: {
@@ -103,7 +116,8 @@ const Contact = () => {
           },
           body: JSON.stringify({ 
             email: form.email, 
-            code: form.verificationCode 
+            code: form.verificationCode,
+            action: 'verify'
           })
         }
       );
