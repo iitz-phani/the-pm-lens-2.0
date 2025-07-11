@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verification Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, button { padding: 10px; font-size: 16px; }
+        input { width: 100%; box-sizing: border-box; }
+        button { background: #007bff; color: white; border: none; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .result { margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 5px; }
+        .error { background: #f8d7da; color: #721c24; }
+        .success { background: #d4edda; color: #155724; }
+    </style>
+</head>
+<body>
+    <h1>🔐 Verification Function Test</h1>
+    
+    <div class="form-group">
+        <label for="email">Email:</label>
+        <input type="email" id="email" placeholder="Enter your email">
+    </div>
+    
+    <button onclick="testVerification()">Test Verification Function</button>
+    <button onclick="testSimpleVerification()">Test Simple Verification</button>
+    
+    <div id="result"></div>
+
+    <script>
+        async function testVerification() {
+            const email = document.getElementById('email').value;
+            const resultDiv = document.getElementById('result');
+            
+            if (!email) {
+                resultDiv.innerHTML = '<div class="result error">Please enter an email address</div>';
+                return;
+            }
+            
+            try {
+                const response = await fetch('/.netlify/functions/test-verification', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            <h3>✅ Test Successful!</h3>
+                            <p><strong>Email:</strong> ${data.email}</p>
+                            <p><strong>Code:</strong> ${data.code}</p>
+                            <p><strong>Message:</strong> ${data.message}</p>
+                            <p><strong>Timestamp:</strong> ${data.timestamp}</p>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<div class="result error">Error: ${data.error}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="result error">Network Error: ${error.message}</div>`;
+            }
+        }
+        
+        async function testSimpleVerification() {
+            const email = document.getElementById('email').value;
+            const resultDiv = document.getElementById('result');
+            
+            if (!email) {
+                resultDiv.innerHTML = '<div class="result error">Please enter an email address</div>';
+                return;
+            }
+            
+            try {
+                const response = await fetch('/.netlify/functions/simple-verification', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, action: 'send' })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            <h3>✅ Simple Verification Successful!</h3>
+                            <p><strong>Email:</strong> ${data.email}</p>
+                            <p><strong>Code:</strong> ${data.code}</p>
+                            <p><strong>Message:</strong> ${data.message}</p>
+                            <p><strong>Debug:</strong> ${data.debug}</p>
+                            <p><strong>Timestamp:</strong> ${data.timestamp}</p>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<div class="result error">Error: ${data.error}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="result error">Network Error: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html> 

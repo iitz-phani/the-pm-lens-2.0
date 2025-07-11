@@ -209,13 +209,23 @@ const Index = () => {
       setVerificationSent(true);
       
       // For testing purposes, show the code in console and toast
+      console.log('Full response data:', data);
+      
       if (data.code) {
-        console.log('Verification code for testing:', data.code);
+        console.log('🔐 VERIFICATION CODE FOR TESTING:', data.code);
+        console.log('📧 Email:', data.email);
+        console.log('⏰ Timestamp:', data.timestamp);
+        
         toast({
-          title: "Verification Code Generated!",
-          description: `Code: ${data.code} (Check console for testing)`,
+          title: "🔐 Verification Code Generated!",
+          description: `Your code is: ${data.code}`,
+          duration: 10000, // Show for 10 seconds
         });
+        
+        // Also show an alert for maximum visibility
+        alert(`🔐 VERIFICATION CODE: ${data.code}\n\nThis code is for testing purposes. Please enter it in the verification field.`);
       } else {
+        console.log('No code in response:', data);
         toast({
           title: "Verification Code Sent!",
           description: "Please check your email for the verification code.",
