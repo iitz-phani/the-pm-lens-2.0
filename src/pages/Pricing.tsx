@@ -55,7 +55,7 @@ const Pricing = () => {
         "Performance analytics"
       ],
       badge: "New",
-      cta: "Learn More",
+      cta: "Get Started",
       popular: false
     },
     {
@@ -71,7 +71,7 @@ const Pricing = () => {
         "Monthly check-ins"
       ],
       badge: "Trending",
-      cta: "Start Growing",
+      cta: "Get Started",
       popular: false
     }
   ];
