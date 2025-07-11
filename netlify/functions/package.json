@@ -1,0 +1,17 @@
+{
+  "name": "netlify-functions",
+  "version": "1.0.0",
+  "description": "Netlify functions for The PM Lens",
+  "main": "index.js",
+  "dependencies": {
+    "nodemailer": "^6.9.9",
+    "razorpay": "^2.9.6"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+} 
