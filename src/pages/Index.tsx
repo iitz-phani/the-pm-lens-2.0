@@ -621,7 +621,7 @@ const Index = () => {
               <div>
                 <h3 className="text-2xl font-bold mb-6 text-white">Ready to Transform Your Projects?</h3>
                 <p className="text-gray-400 mb-6 text-lg">
-                  Book a 30-minute discovery call to discuss how we can accelerate your PM processes and content strategy.
+                  Book a 30-minute discovery call to discuss how we can accelerate your current strategy.
                 </p>
                 <Button 
                   size="lg" 
