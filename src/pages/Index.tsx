@@ -81,7 +81,7 @@ const Index = () => {
     }
     const timer = setTimeout(() => {
       setShowTimerPopup(true);
-    }, 3000); // 3 seconds for testing
+    }, 30000); // 30 seconds
     return () => clearTimeout(timer);
   }, []);
 
