@@ -13,13 +13,31 @@ interface PaymentModalProps {
   isUpgrade?: boolean;
 }
 
+// Helper to parse price string like '₹2,499' to 2499
+function parsePrice(priceStr: string) {
+  if (!priceStr) return 0;
+  const match = priceStr.replace(/[^\d]/g, '');
+  return parseInt(match, 10) || 0;
+}
+
 const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onSuccess, service, isUpgrade = false }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<'pending' | 'success' | 'failed'>('pending');
   const [customerEmail, setCustomerEmail] = useState('');
   const [customerName, setCustomerName] = useState('');
 
-  const amount = isUpgrade && service ? service.upgradePrice : 499; // ₹499 for discovery call, upgrade price for upgrades
+  // Determine if this is a discovery call (Project Management Consulting)
+  const isDiscoveryCall = false;
+
+  // Safely determine amount
+  let amount = 499;
+  if (isUpgrade && service) {
+    amount = service.upgradePrice;
+  } else if (isDiscoveryCall) {
+    amount = 499;
+  } else if (service && service.price) {
+    amount = parsePrice(service.price);
+  }
   const calendlyUrl = 'https://calendly.com/phani-bozzam/30min';
 
   useEffect(() => {
@@ -105,49 +123,13 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onSuccess,
             setPaymentStatus('success');
             toast({
               title: "Payment Successful!",
-              description: isUpgrade 
-                ? `You've successfully upgraded to ${service?.title}. We'll contact you soon to schedule your session.`
-                : "Redirecting to Calendly to schedule your discovery call.",
+              description: "Thank you for your payment. We will contact you soon.",
             });
 
-            // Redirect to Calendly after a short delay (only for discovery calls)
-            if (!isUpgrade) {
-              setTimeout(() => {
-                window.open(calendlyUrl, '_blank');
-                onSuccess();
-                onClose();
-              }, 2000);
-            } else {
-                          // For upgrades, just close the modal and call onSuccess
             setTimeout(() => {
               onSuccess();
               onClose();
             }, 2000);
-          }
-
-          // Send upgrade email if this was a discovery call payment
-          if (!isUpgrade) {
-            try {
-              await fetch(
-                import.meta.env.PROD
-                  ? '/.netlify/functions/send-upgrade-email'
-                  : 'http://localhost:5000/api/send-upgrade-email',
-                {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({
-                    paymentId: response.razorpay_payment_id,
-                    customerEmail: customerEmail,
-                    customerName: customerName
-                  })
-                }
-              );
-            } catch (error) {
-              console.error('Error sending upgrade email:', error);
-            }
-            }
 
           } catch (error) {
             console.error('Payment verification error:', error);
@@ -196,12 +178,30 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onSuccess,
     handlePayment();
   };
 
+  // Fallback UI if service is not set
+  if (!service) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-center">
+              Loading service details...
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex justify-center items-center py-10">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-center">
-            {isUpgrade ? `Upgrade to ${service?.title}` : 'Book Discovery Call'}
+            {isUpgrade ? `Upgrade to ${service?.title}` : isDiscoveryCall ? 'Book Discovery Call' : `Pay for ${service?.title}`}
           </DialogTitle>
         </DialogHeader>
 
@@ -210,10 +210,10 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onSuccess,
           <Card className="border-blue-200 bg-blue-50/10">
             <CardHeader className="pb-4">
               <CardTitle className="text-lg text-blue-600">
-                {isUpgrade ? service?.title : 'Discovery Call Package'}
+                {isUpgrade ? service?.title : isDiscoveryCall ? 'Discovery Call Package' : service?.title}
               </CardTitle>
               <CardDescription className="text-gray-600">
-                {isUpgrade ? service?.description : '30-minute consultation to understand your needs'}
+                {isUpgrade ? service?.description : isDiscoveryCall ? '30-minute consultation to understand your needs' : service?.description}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -224,7 +224,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onSuccess,
                     <span className="text-sm text-gray-600">{feature}</span>
                   </div>
                 ))
-              ) : (
+              ) : isDiscoveryCall ? (
                 <>
                   <div className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-green-500" />
@@ -243,12 +243,12 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onSuccess,
                     <span className="text-sm text-gray-600">Next steps planning</span>
                   </div>
                 </>
-              )}
+              ) : null}
             </CardContent>
           </Card>
 
-          {/* Customer Info (for discovery calls) */}
-          {!isUpgrade && (
+          {/* Customer Info (for discovery calls only) */}
+          {isDiscoveryCall && !isUpgrade && (
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -279,9 +279,9 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onSuccess,
 
           {/* Price */}
           <div className="text-center">
-            <div className="text-3xl font-bold text-gray-900">₹{amount}</div>
+            <div className="text-3xl font-bold text-gray-200">₹{amount}</div>
             <p className="text-sm text-gray-500">
-              {isUpgrade ? 'Upgrade payment (₹499 credit applied)' : 'One-time payment'}
+              {isUpgrade ? 'Upgrade payment (₹499 credit applied)' : isDiscoveryCall ? 'One-time payment' : 'Service payment'}
             </p>
             {isUpgrade && service && (
               <div className="mt-2 text-xs text-gray-400">
@@ -297,7 +297,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onSuccess,
               <CheckCircle className="h-5 w-5 text-green-500" />
               <div>
                 <p className="font-medium text-green-800">Payment Successful!</p>
-                <p className="text-sm text-green-600">Redirecting to Calendly...</p>
+                <p className="text-sm text-green-600">Thank you for your payment.</p>
               </div>
             </div>
           )}
@@ -315,11 +315,11 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onSuccess,
           {/* Action Buttons */}
           <div className="space-y-3">
             {paymentStatus === 'pending' && (
-                              <Button
-                  onClick={handlePayment}
-                  disabled={isLoading || (!isUpgrade && (!customerName || !customerEmail))}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3"
-                >
+              <Button
+                onClick={handlePayment}
+                disabled={isLoading}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3"
+              >
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -328,7 +328,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onSuccess,
                 ) : (
                   <>
                     <Calendar className="mr-2 h-4 w-4" />
-                    {isUpgrade ? `Pay ₹${amount} & Upgrade` : `Pay ₹${amount} & Book Call`}
+                    {isUpgrade ? 'Pay & Upgrade' : 'Pay Now'}
                   </>
                 )}
               </Button>
