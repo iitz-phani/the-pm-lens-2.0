@@ -30,8 +30,8 @@ const Index = () => {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('theme');
       if (stored) return stored;
-      // Default to system preference
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      // Default to dark theme
+      return 'dark';
     }
     return 'dark';
   });
