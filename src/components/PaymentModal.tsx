@@ -94,7 +94,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onSuccess,
         currency: orderData.currency,
         name: 'The PM Lens',
         description: isUpgrade ? `${service?.title} - Upgrade` : 'Discovery Call - 30 Minute Consultation',
-        image: '/The PM Lens Logo.png',
+        image: '/The PM Lens Logo - Dark.png',
         order_id: orderData.id,
         handler: async function (response: any) {
           try {
