@@ -96,10 +96,4 @@
   command = "npm run dev"
   port = 8080
   publish = "dist"
-  functions = "netlify/functions"
-
-# Plugin settings (if using plugins)
-[plugins]
-  # Example: Netlify cache plugin
-  # [plugins.netlify-cache]
-  #   paths = ["node_modules/.cache", ".cache"] 
+  functions = "netlify/functions" 
