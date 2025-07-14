@@ -560,7 +560,7 @@ const Index = () => {
             <div className="relative order-1 md:order-2 mx-auto md:mx-0 max-w-md w-full">
               <div className="aspect-square rounded-2xl overflow-hidden shadow-2xl">
                 <img 
-                  src="/My Image.jpg" 
+                  src="/my-image.jpg" 
                   alt="Phani Bozzam" 
                   className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                 />
