@@ -60,8 +60,7 @@ const Contact = () => {
       
       if (data.emailSent) {
         // Email was sent successfully
-        console.log('✅ Email sent successfully to:', data.email);
-        console.log('📧 Message ID:', data.messageId);
+
         
         toast({
           title: "✅ Verification Code Sent!",
@@ -70,9 +69,7 @@ const Contact = () => {
         });
       } else {
         // Email failed - show error message
-        console.log('❌ Email delivery failed');
-        console.log('📧 Email:', data.email);
-        console.log('❌ Email Error:', data.emailError);
+
         
         toast({
           title: "❌ Email Delivery Failed",

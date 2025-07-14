@@ -19,7 +19,7 @@ const Upgrade = () => {
     if (paymentIdFromUrl) {
       setPaymentId(paymentIdFromUrl);
       // In production, you'd verify this payment ID with your backend
-      console.log('Payment ID from URL:', paymentIdFromUrl);
+  
     }
     setIsLoading(false);
   }, [searchParams]);

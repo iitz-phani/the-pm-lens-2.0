@@ -104,12 +104,11 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    console.log('Function started');
-    console.log('Event body:', event.body);
+    
     
     const { email, action, code } = JSON.parse(event.body);
 
-    console.log('Parsed data:', { email, action, code });
+
 
     if (!email || !email.includes('@')) {
       return {
@@ -119,20 +118,11 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Check environment variables
-    console.log('Environment check:', {
-      hasEmailUser: !!process.env.EMAIL_USER,
-      hasEmailPass: !!process.env.EMAIL_PASS,
-      emailUser: process.env.EMAIL_USER ? 'Set' : 'Missing',
-      emailPass: process.env.EMAIL_PASS ? 'Set' : 'Missing'
-    });
+
 
     if (action === 'send') {
-      console.log('Sending verification code to:', email);
-      
       // Generate a 6-digit verification code
       const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-      console.log('Generated code:', verificationCode);
       
       // Clean up expired codes
       cleanupExpiredCodes();
@@ -143,14 +133,11 @@ exports.handler = async (event, context) => {
         expiresAt: Date.now() + 10 * 60 * 1000 // 10 minutes
       };
 
-      console.log('Stored codes:', Object.keys(verificationCodes));
-
       // Send verification email
-      console.log('Attempting to send email to:', email);
       const emailResult = await sendVerificationEmail(email, verificationCode);
       
       if (emailResult.success) {
-        console.log('Email sent successfully with message ID:', emailResult.messageId);
+
         return {
           statusCode: 200,
           headers,
@@ -163,7 +150,7 @@ exports.handler = async (event, context) => {
           })
         };
       } else {
-        console.error('Failed to send email:', emailResult.error);
+
         // Don't show the code, just inform about the failure
         return {
           statusCode: 500,
@@ -181,7 +168,7 @@ exports.handler = async (event, context) => {
       }
 
     } else if (action === 'verify') {
-      console.log('Verifying code for:', email);
+
       
       if (!code) {
         return {
@@ -196,7 +183,6 @@ exports.handler = async (event, context) => {
 
       // Get stored verification data
       const storedData = verificationCodes[email];
-      console.log('Stored data for email:', storedData);
 
       if (!storedData) {
         return {
@@ -248,7 +234,6 @@ exports.handler = async (event, context) => {
     }
 
   } catch (error) {
-    console.error('Function error:', error);
     
     return {
       statusCode: 500,

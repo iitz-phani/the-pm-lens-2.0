@@ -316,12 +316,11 @@ const Index = () => {
       const data = await response.json();
       setVerificationSent(true);
       
-      console.log('Full response data:', data);
+      
       
       if (data.emailSent) {
         // Email was sent successfully
-        console.log('✅ Email sent successfully to:', data.email);
-        console.log('📧 Message ID:', data.messageId);
+
         
         toast({
           title: "✅ Verification Code Sent!",
@@ -330,9 +329,7 @@ const Index = () => {
         });
       } else {
         // Email failed - show error message
-        console.log('❌ Email delivery failed');
-        console.log('📧 Email:', data.email);
-        console.log('❌ Email Error:', data.emailError);
+
         
         toast({
           title: "❌ Email Delivery Failed",
@@ -342,7 +339,6 @@ const Index = () => {
         });
       }
     } catch (error) {
-      console.error('Error:', error);
       toast({
         title: "Error",
         description: "Failed to send verification code. Please try again.",
@@ -393,7 +389,6 @@ const Index = () => {
         description: "Your email has been successfully verified.",
       });
     } catch (error) {
-      console.error('Error:', error);
       toast({
         title: "Verification Failed",
         description: "Invalid verification code. Please try again.",
@@ -441,7 +436,6 @@ const Index = () => {
       }
 
       const data = await response.json();
-      console.log('Response:', data);
 
       toast({
         title: "Message Sent!",
@@ -458,7 +452,6 @@ const Index = () => {
       setEmailVerified(false);
       setVerificationSent(false);
     } catch (error) {
-      console.error('Error:', error);
       toast({
         title: "Error",
         description: "Failed to send message. Please try again.",
@@ -745,7 +738,7 @@ const Index = () => {
           <div className="grid md:grid-cols-2 gap-12">
             <div className="space-y-10">
               <div>
-                <h3 className="text-2xl font-bold mb-6 text-white">Ready to Transform Your Projects?</h3>
+                <h3 className="text-2xl font-bold mb-6 text-blue-600 dark:text-blue-400 transition-colors duration-300">Ready to Transform Your Projects?</h3>
                 <p className={`mb-6 text-lg transition-colors duration-300 text-black dark:text-gray-300`}>Book a 30-minute discovery call to discuss how we can accelerate your current strategy.</p>
                 <Button 
                   size="lg" 

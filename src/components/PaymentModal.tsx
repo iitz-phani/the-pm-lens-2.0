@@ -132,7 +132,6 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onSuccess,
             }, 2000);
 
           } catch (error) {
-            console.error('Payment verification error:', error);
             setPaymentStatus('failed');
             toast({
               title: "Payment Verification Failed",
@@ -161,7 +160,6 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onSuccess,
       razorpay.open();
 
     } catch (error) {
-      console.error('Payment error:', error);
       setPaymentStatus('failed');
       toast({
         title: "Payment Failed",

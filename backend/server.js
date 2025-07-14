@@ -11,10 +11,7 @@ const verificationCodes = new Map();
 
 dotenv.config();
 
-// Debug logging
-console.log('Environment variables loaded:');
-console.log('DATABASE_URL:', process.env.DATABASE_URL);
-console.log('CORS_ORIGIN:', process.env.CORS_ORIGIN);
+
 
 const app = express();
 
@@ -38,7 +35,7 @@ pool.query('SELECT NOW()', (err, res) => {
   if (err) {
     console.error('❌ PostgreSQL connection error:', err);
   } else {
-    console.log('✅ Connected to Neon PostgreSQL successfully!');
+
   }
 });
 
@@ -57,7 +54,7 @@ pool.query(createTableQuery, (err, res) => {
   if (err) {
     console.error('❌ Error creating table:', err);
   } else {
-    console.log('✅ Messages table ready');
+
   }
 });
 
@@ -110,8 +107,6 @@ app.post('/api/contact', async (req, res) => {
     const result = await pool.query(insertQuery, values);
     const messageId = result.rows[0].id;
     
-    console.log('✅ Message saved to database:', messageId);
-
     // Send email notification
     try {
       const mailOptions = {
@@ -126,7 +121,6 @@ app.post('/api/contact', async (req, res) => {
       };
 
       await transporter.sendMail(mailOptions);
-      console.log('✅ Email notification sent');
     } catch (emailError) {
       console.error('❌ Email sending failed:', emailError);
       // Continue execution even if email fails
@@ -422,8 +416,7 @@ const sendUpgradeEmail = async (paymentData) => {
     `;
 
     // Send email (you'll need to implement this based on your email service)
-    console.log('Upgrade email content generated for payment:', paymentData.payment_id);
-    console.log('Email would be sent to customer with upgrade offers');
+
     
     // For now, just log the email content
     // In production, you'd send this via your email service
@@ -502,7 +495,7 @@ app.post('/api/verify-payment', async (req, res) => {
 
     // Store payment data
     payments.set(razorpay_payment_id, paymentData);
-    console.log('Payment verified:', paymentData);
+
 
     // Send follow-up email with upgrade offers
     setTimeout(() => {
@@ -526,5 +519,5 @@ app.post('/api/verify-payment', async (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`✨ Server running on port ${PORT}`);
+
 }); 

@@ -8,7 +8,13 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "cache:clean": "node scripts/cache-cleanup.cjs",
+    "cache:clean:rebuild": "node scripts/cache-cleanup.cjs --rebuild",
+    "cache:scheduler": "node scripts/cache-scheduler.cjs",
+    "cache:scheduler:start": "node scripts/cache-scheduler.cjs --interval 1",
+    "netlify:build": "node scripts/netlify-build.cjs",
+    "netlify:cache:check": "curl -s https://thepmlens.netlify.app/.netlify/functions/cache-manager"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
