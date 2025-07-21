@@ -316,7 +316,7 @@ const Index = () => {
       const data = await response.json();
       setVerificationSent(true);
       
-      
+
       
       if (data.emailSent) {
         // Email was sent successfully
