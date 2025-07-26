@@ -879,7 +879,7 @@ const Index = () => {
             <Link to="/contact" className="text-gray-400 hover:text-brand-blue transition-colors">Contact Us</Link>
           </div>
           <p className="text-gray-500 text-base">
-            © 2025 Phani Bhushan Bozzam. All rights reserved.
+            © 2025 The PM Lens. All rights reserved.
           </p>
         </div>
       </footer>

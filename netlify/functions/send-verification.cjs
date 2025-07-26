@@ -148,7 +148,7 @@ exports.handler = async (event, context) => {
           </div>
           <div style="text-align: center; margin-top: 20px; color: #999; font-size: 12px;">
             <p>The PM Lens - Project Management Consulting & AI Content Strategy</p>
-            <p>© 2025 Phani Bhushan Bozzam. All rights reserved.</p>
+            <p>© 2025 The PM Lens. All rights reserved.</p>
           </div>
         </div>
       `
