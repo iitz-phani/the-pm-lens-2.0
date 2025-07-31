@@ -1,5 +1,5 @@
-import { Pool } from 'pg';
-import nodemailer from 'nodemailer';
+const { Pool } = require('pg');
+const nodemailer = require('nodemailer');
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -14,12 +14,12 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-export async function handler(event, context) {
+exports.handler = async function(event, context) {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
-  const { name, email, message } = JSON.parse(event.body);
+  const { name, email, message, subject } = JSON.parse(event.body);
 
   try {
     // Save to Neon
@@ -35,8 +35,8 @@ export async function handler(event, context) {
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: 'phani.bozzam@gmail.com',
-      subject: `New Contact Form Submission from ${name}`,
-      text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`
+      subject: `New Contact Form Submission from ${name}${subject ? ` - ${subject}` : ''}`,
+      text: `Name: ${name}\nEmail: ${email}${subject ? `\nSubject: ${subject}` : ''}\nMessage: ${message}`
     });
 
     return {
