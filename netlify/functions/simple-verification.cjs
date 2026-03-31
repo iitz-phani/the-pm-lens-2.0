@@ -1,16 +1,26 @@
+const { Pool } = require('pg');
 const nodemailer = require('nodemailer');
 
-// Simple in-memory storage for this function instance
-let verificationCodes = {};
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
+});
 
-// Clean up expired codes
-const cleanupExpiredCodes = () => {
-  const now = Date.now();
-  Object.keys(verificationCodes).forEach(email => {
-    if (verificationCodes[email].expiresAt < now) {
-      delete verificationCodes[email];
-    }
-  });
+let tableReady = false;
+
+const ensureVerificationTable = async () => {
+  if (tableReady) return;
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS verification_codes (
+      email TEXT PRIMARY KEY,
+      code TEXT NOT NULL,
+      expires_at BIGINT NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  tableReady = true;
 };
 
 // Create email transporter
@@ -104,8 +114,8 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    
-    
+    await ensureVerificationTable();
+
     const { email, action, code } = JSON.parse(event.body);
 
 
@@ -120,18 +130,27 @@ exports.handler = async (event, context) => {
 
 
 
+    // Delete expired codes before every operation
+    await pool.query('DELETE FROM verification_codes WHERE expires_at < $1', [Date.now()]);
+
     if (action === 'send') {
       // Generate a 6-digit verification code
       const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-      
-      // Clean up expired codes
-      cleanupExpiredCodes();
-      
-      // Store the code with expiration (10 minutes)
-      verificationCodes[email] = {
-        code: verificationCode,
-        expiresAt: Date.now() + 10 * 60 * 1000 // 10 minutes
-      };
+      const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+      // Persist code in DB so verification works across serverless instances
+      await pool.query(
+        `
+          INSERT INTO verification_codes (email, code, expires_at)
+          VALUES ($1, $2, $3)
+          ON CONFLICT (email)
+          DO UPDATE SET
+            code = EXCLUDED.code,
+            expires_at = EXCLUDED.expires_at,
+            created_at = CURRENT_TIMESTAMP
+        `,
+        [email, verificationCode, expiresAt]
+      );
 
       // Send verification email
       const emailResult = await sendVerificationEmail(email, verificationCode);
@@ -178,11 +197,12 @@ exports.handler = async (event, context) => {
         };
       }
 
-      // Clean up expired codes
-      cleanupExpiredCodes();
-
-      // Get stored verification data
-      const storedData = verificationCodes[email];
+      // Get stored verification data from DB
+      const result = await pool.query(
+        'SELECT code, expires_at FROM verification_codes WHERE email = $1',
+        [email]
+      );
+      const storedData = result.rows[0];
 
       if (!storedData) {
         return {
@@ -193,8 +213,8 @@ exports.handler = async (event, context) => {
       }
 
       // Check if code has expired
-      if (Date.now() > storedData.expiresAt) {
-        delete verificationCodes[email]; // Clean up expired code
+      if (Date.now() > Number(storedData.expires_at)) {
+        await pool.query('DELETE FROM verification_codes WHERE email = $1', [email]);
         return {
           statusCode: 400,
           headers,
@@ -212,7 +232,7 @@ exports.handler = async (event, context) => {
       }
 
       // Code is valid - remove it from storage and mark email as verified
-      delete verificationCodes[email];
+      await pool.query('DELETE FROM verification_codes WHERE email = $1', [email]);
 
       return {
         statusCode: 200,

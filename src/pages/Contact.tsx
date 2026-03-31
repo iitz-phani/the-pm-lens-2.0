@@ -56,8 +56,13 @@ const Contact = () => {
       );
 
       const data = await response.json();
+
+      if (!response.ok || data.emailSent === false) {
+        throw new Error(data?.error || 'Failed to send verification code');
+      }
+
       setVerificationSent(true);
-      
+
       if (data.emailSent) {
         // Email was sent successfully
 
@@ -67,18 +72,9 @@ const Contact = () => {
           description: "Please check your email for the verification code.",
           duration: 5000,
         });
-      } else {
-        // Email failed - show error message
-
-        
-        toast({
-          title: "❌ Email Delivery Failed",
-          description: "Unable to send verification code. Please try again later.",
-          variant: "destructive",
-          duration: 8000,
-        });
       }
     } catch (err) {
+      setVerificationSent(false);
       setError('Failed to send verification code. Please try again.');
       toast({
         title: "Error",
