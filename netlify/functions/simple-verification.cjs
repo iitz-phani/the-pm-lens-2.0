@@ -1,5 +1,6 @@
 const { Pool } = require('pg');
 const nodemailer = require('nodemailer');
+const crypto = require('crypto');
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -7,6 +8,28 @@ const pool = new Pool({
 });
 
 let tableReady = false;
+
+const createVerificationToken = (email, code, expiresAt) => {
+  const payload = Buffer.from(JSON.stringify({ email, code, expiresAt })).toString('base64url');
+  const secret = process.env.VERIFICATION_SECRET || process.env.EMAIL_PASS || 'pm-lens-fallback-secret';
+  const signature = crypto.createHmac('sha256', secret).update(payload).digest('base64url');
+  return `${payload}.${signature}`;
+};
+
+const readVerificationToken = (token) => {
+  if (!token || typeof token !== 'string' || !token.includes('.')) return null;
+  const [payload, signature] = token.split('.');
+  const secret = process.env.VERIFICATION_SECRET || process.env.EMAIL_PASS || 'pm-lens-fallback-secret';
+  const expected = crypto.createHmac('sha256', secret).update(payload).digest('base64url');
+
+  if (signature !== expected) return null;
+
+  try {
+    return JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
+  } catch (error) {
+    return null;
+  }
+};
 
 const ensureVerificationTable = async () => {
   if (tableReady) return;
@@ -114,9 +137,7 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    await ensureVerificationTable();
-
-    const { email, action, code } = JSON.parse(event.body);
+    const { email, action, code, verificationToken } = JSON.parse(event.body);
 
 
 
@@ -130,27 +151,40 @@ exports.handler = async (event, context) => {
 
 
 
-    // Delete expired codes before every operation
-    await pool.query('DELETE FROM verification_codes WHERE expires_at < $1', [Date.now()]);
+    try {
+      await ensureVerificationTable();
+      // Delete expired codes before every operation
+      await pool.query('DELETE FROM verification_codes WHERE expires_at < $1', [Date.now()]);
+    } catch (dbError) {
+      console.error('Verification DB unavailable, using token fallback:', dbError.message);
+    }
 
     if (action === 'send') {
       // Generate a 6-digit verification code
       const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
       const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
 
-      // Persist code in DB so verification works across serverless instances
-      await pool.query(
-        `
-          INSERT INTO verification_codes (email, code, expires_at)
-          VALUES ($1, $2, $3)
-          ON CONFLICT (email)
-          DO UPDATE SET
-            code = EXCLUDED.code,
-            expires_at = EXCLUDED.expires_at,
-            created_at = CURRENT_TIMESTAMP
-        `,
-        [email, verificationCode, expiresAt]
-      );
+      const token = createVerificationToken(email, verificationCode, expiresAt);
+      let dbStored = false;
+
+      // Persist code in DB when available
+      try {
+        await pool.query(
+          `
+            INSERT INTO verification_codes (email, code, expires_at)
+            VALUES ($1, $2, $3)
+            ON CONFLICT (email)
+            DO UPDATE SET
+              code = EXCLUDED.code,
+              expires_at = EXCLUDED.expires_at,
+              created_at = CURRENT_TIMESTAMP
+          `,
+          [email, verificationCode, expiresAt]
+        );
+        dbStored = true;
+      } catch (dbError) {
+        console.error('Failed to persist verification code in DB:', dbError.message);
+      }
 
       // Send verification email
       const emailResult = await sendVerificationEmail(email, verificationCode);
@@ -165,7 +199,9 @@ exports.handler = async (event, context) => {
             email: email,
             timestamp: new Date().toISOString(),
             emailSent: true,
-            messageId: emailResult.messageId
+            messageId: emailResult.messageId,
+            verificationToken: token,
+            storageMode: dbStored ? 'database' : 'token'
           })
         };
       } else {
@@ -197,42 +233,72 @@ exports.handler = async (event, context) => {
         };
       }
 
-      // Get stored verification data from DB
-      const result = await pool.query(
-        'SELECT code, expires_at FROM verification_codes WHERE email = $1',
-        [email]
-      );
-      const storedData = result.rows[0];
+      let storedData = null;
 
-      if (!storedData) {
-        return {
-          statusCode: 400,
-          headers,
-          body: JSON.stringify({ error: 'No verification code found for this email. Please request a new code.' })
-        };
+      try {
+        const result = await pool.query(
+          'SELECT code, expires_at FROM verification_codes WHERE email = $1',
+          [email]
+        );
+        storedData = result.rows[0] || null;
+      } catch (dbError) {
+        console.error('DB lookup failed during verification:', dbError.message);
       }
 
-      // Check if code has expired
-      if (Date.now() > Number(storedData.expires_at)) {
-        await pool.query('DELETE FROM verification_codes WHERE email = $1', [email]);
-        return {
-          statusCode: 400,
-          headers,
-          body: JSON.stringify({ error: 'Verification code has expired. Please request a new code.' })
-        };
-      }
+      if (storedData) {
+        if (Date.now() > Number(storedData.expires_at)) {
+          try {
+            await pool.query('DELETE FROM verification_codes WHERE email = $1', [email]);
+          } catch (error) {
+            console.error('DB cleanup failed:', error.message);
+          }
+          return {
+            statusCode: 400,
+            headers,
+            body: JSON.stringify({ error: 'Verification code has expired. Please request a new code.' })
+          };
+        }
 
-      // Verify the code
-      if (storedData.code !== code) {
-        return {
-          statusCode: 400,
-          headers,
-          body: JSON.stringify({ error: 'Invalid verification code. Please try again.' })
-        };
-      }
+        if (storedData.code !== code) {
+          return {
+            statusCode: 400,
+            headers,
+            body: JSON.stringify({ error: 'Invalid verification code. Please try again.' })
+          };
+        }
 
-      // Code is valid - remove it from storage and mark email as verified
-      await pool.query('DELETE FROM verification_codes WHERE email = $1', [email]);
+        try {
+          await pool.query('DELETE FROM verification_codes WHERE email = $1', [email]);
+        } catch (error) {
+          console.error('Failed to delete used verification code:', error.message);
+        }
+      } else {
+        // Token fallback for stateless verification in serverless environments.
+        const tokenData = readVerificationToken(verificationToken);
+        if (!tokenData || tokenData.email !== email) {
+          return {
+            statusCode: 400,
+            headers,
+            body: JSON.stringify({ error: 'No verification code found for this email. Please request a new code.' })
+          };
+        }
+
+        if (Date.now() > Number(tokenData.expiresAt)) {
+          return {
+            statusCode: 400,
+            headers,
+            body: JSON.stringify({ error: 'Verification code has expired. Please request a new code.' })
+          };
+        }
+
+        if (String(tokenData.code) !== String(code)) {
+          return {
+            statusCode: 400,
+            headers,
+            body: JSON.stringify({ error: 'Invalid verification code. Please try again.' })
+          };
+        }
+      }
 
       return {
         statusCode: 200,

@@ -20,6 +20,7 @@ const Index = () => {
   const [isVerifying, setIsVerifying] = useState(false);
   const [emailVerified, setEmailVerified] = useState(false);
   const [verificationSent, setVerificationSent] = useState(false);
+  const [verificationToken, setVerificationToken] = useState('');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showUIDesignModal, setShowUIDesignModal] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
@@ -276,6 +277,7 @@ const Index = () => {
     if (name === 'email') {
       setEmailVerified(false);
       setVerificationSent(false);
+      setVerificationToken('');
       setFormData(prev => ({ ...prev, verificationCode: '' }));
     }
   };
@@ -312,10 +314,11 @@ const Index = () => {
       const data = await response.json();
 
       if (!response.ok || data.emailSent === false) {
-        throw new Error(data?.error || 'Failed to send verification code');
+        throw new Error(data?.message || data?.error || 'Failed to send verification code');
       }
 
       setVerificationSent(true);
+      setVerificationToken(data.verificationToken || '');
       
 
       
@@ -331,9 +334,10 @@ const Index = () => {
       }
     } catch (error) {
       setVerificationSent(false);
+      setVerificationToken('');
       toast({
         title: "Error",
-        description: "Failed to send verification code. Please try again.",
+        description: error?.message || "Failed to send verification code. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -366,13 +370,15 @@ const Index = () => {
           body: JSON.stringify({ 
             email: formData.email, 
             code: formData.verificationCode,
+            verificationToken,
             action: 'verify'
           })
         }
       );
 
+      const data = await response.json();
       if (!response.ok) {
-        throw new Error('Invalid verification code');
+        throw new Error(data?.error || 'Invalid verification code');
       }
 
       setEmailVerified(true);
@@ -383,7 +389,7 @@ const Index = () => {
     } catch (error) {
       toast({
         title: "Verification Failed",
-        description: "Invalid verification code. Please try again.",
+        description: error?.message || "Invalid verification code. Please try again.",
         variant: "destructive"
       });
     } finally {

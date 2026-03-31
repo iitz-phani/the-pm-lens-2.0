@@ -18,6 +18,7 @@ const Contact = () => {
   const [isVerifying, setIsVerifying] = useState(false);
   const [emailVerified, setEmailVerified] = useState(false);
   const [verificationSent, setVerificationSent] = useState(false);
+  const [verificationToken, setVerificationToken] = useState('');
   const [error, setError] = useState('');
 
   const handleChange = (e) => {
@@ -26,6 +27,7 @@ const Contact = () => {
     if (e.target.name === 'email') {
       setEmailVerified(false);
       setVerificationSent(false);
+      setVerificationToken('');
       setForm(prev => ({ ...prev, verificationCode: '' }));
     }
   };
@@ -58,10 +60,11 @@ const Contact = () => {
       const data = await response.json();
 
       if (!response.ok || data.emailSent === false) {
-        throw new Error(data?.error || 'Failed to send verification code');
+        throw new Error(data?.message || data?.error || 'Failed to send verification code');
       }
 
       setVerificationSent(true);
+      setVerificationToken(data.verificationToken || '');
 
       if (data.emailSent) {
         // Email was sent successfully
@@ -75,10 +78,11 @@ const Contact = () => {
       }
     } catch (err) {
       setVerificationSent(false);
+      setVerificationToken('');
       setError('Failed to send verification code. Please try again.');
       toast({
         title: "Error",
-        description: "Failed to send verification code. Please try again.",
+        description: err?.message || "Failed to send verification code. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -110,13 +114,15 @@ const Contact = () => {
           body: JSON.stringify({ 
             email: form.email, 
             code: form.verificationCode,
+            verificationToken,
             action: 'verify'
           })
         }
       );
 
+      const data = await response.json();
       if (!response.ok) {
-        throw new Error('Invalid verification code');
+        throw new Error(data?.error || 'Invalid verification code');
       }
 
       setEmailVerified(true);
@@ -128,7 +134,7 @@ const Contact = () => {
       setError('Invalid verification code. Please try again.');
       toast({
         title: "Verification Failed",
-        description: "Invalid verification code. Please try again.",
+        description: err?.message || "Invalid verification code. Please try again.",
         variant: "destructive"
       });
     } finally {
