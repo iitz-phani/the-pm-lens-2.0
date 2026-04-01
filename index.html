@@ -17,12 +17,15 @@
     <meta name="apple-mobile-web-app-title" content="PM Lens" />
     <link rel="manifest" href="/favicon/site.webmanifest" />
 
+    <!-- ✅ NEW: Canonical Tag -->
+    <link rel="canonical" href="https://thepmlens.netlify.app" />
+
     <!-- OpenGraph -->
     <meta property="og:title" content="Phani Bozzam - The PM Lens | Project Management Consultant" />
     <meta property="og:site_name" content="The PM Lens" />
     <meta property="og:description" content="Action-oriented PM insight + AI-driven content to accelerate careers and deliver real ROI." />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="/The PM Lens Logo - Dark.png" />
+    <meta property="og:image" content="https://thepmlens.netlify.app/The PM Lens Logo - Dark.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:url" content="https://thepmlens.netlify.app" />
@@ -31,7 +34,7 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Phani Bozzam - The PM Lens | Project Management Consultant" />
     <meta name="twitter:description" content="Action-oriented PM insight + AI-driven content to accelerate careers and deliver real ROI." />
-    <meta name="twitter:image" content="/The PM Lens Logo - Dark.png" />
+    <meta name="twitter:image" content="https://thepmlens.netlify.app/The PM Lens Logo - Dark.png" />
 
     <!-- Structured Data for Google site name -->
     <script type="application/ld+json">
@@ -42,7 +45,25 @@
         "url": "https://thepmlens.netlify.app"
       }
     </script>
-    
+
+    <!-- ✅ NEW: Organization Schema -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "The PM Lens",
+        "url": "https://thepmlens.netlify.app",
+        "logo": "https://thepmlens.netlify.app/The PM Lens Logo - Dark.png",
+        "founder": {
+          "@type": "Person",
+          "name": "Phani Bozzam"
+        },
+        "sameAs": [
+          "https://www.linkedin.com/in/phani-bozzam"
+        ]
+      }
+    </script>
+
     <!-- Performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
