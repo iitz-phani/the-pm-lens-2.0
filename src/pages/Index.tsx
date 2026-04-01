@@ -471,7 +471,7 @@ const Index = () => {
             <img 
               src={theme === 'dark' ? '/The PM Lens Logo.png' : '/The PM Lens Logo - Dark.png'} 
               alt="The PM Lens Logo" 
-              className="h-16 w-auto cursor-pointer" 
+              className="h-16 w-48 object-contain cursor-pointer" 
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             />
           </div>
